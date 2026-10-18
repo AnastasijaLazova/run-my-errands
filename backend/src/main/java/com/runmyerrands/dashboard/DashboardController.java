@@ -1,5 +1,6 @@
 package com.runmyerrands.dashboard;
 
+import com.runmyerrands.dashboard.dto.GiverDashboardDto;
 import com.runmyerrands.dashboard.dto.RequesterDashboardDto;
 import com.runmyerrands.user.User;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,10 @@ public class DashboardController {
     @GetMapping("/requester")
     public RequesterDashboardDto requester(@AuthenticationPrincipal User me) {
         return dashboardService.requester(me);
+    }
+
+    @GetMapping("/giver")
+    public GiverDashboardDto giver(@AuthenticationPrincipal User me) {
+        return dashboardService.giver(me);
     }
 }

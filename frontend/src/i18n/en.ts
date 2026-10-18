@@ -1,13 +1,17 @@
 export const en = {
   appName: 'Run My Errands',
-  nav: { home: 'Home', post: 'Post a favor', bookings: 'My bookings', giverHome: 'Giver dashboard', requester: 'Requester', browse: 'Open requests', notifications: 'Alerts', logout: 'Log out', login: 'Log in' },
-  auth: { loginTitle: 'Welcome back', registerTitle: 'Create your account', email: 'Email', password: 'Password', name: 'Full name', neighbourhood: 'Neighbourhood', neighbourhoodPlaceholder: 'e.g. Debar Maalo', neighbourhoodHint: 'Exact address is only shared after a booking is confirmed.', phone: 'Phone (optional)', phoneHint: 'Your number is only shared after a booking is confirmed.', signIn: 'Sign in', createAccount: 'Create account', continue: 'Continue', terms: 'By continuing you accept the community rules.', heroTitle: 'Someone two streets away is already doing that errand.', heroSub: 'Post the favor with your price, see Givers and their neighbourhoods, book one. You settle the money between yourselves.', login: 'Log in', register: 'Sign up', noAccount: 'No account yet?', haveAccount: 'Already have an account?' },
+  nav: { home: 'Home', post: 'Post a favor', bookings: 'My bookings', giverHome: 'Giver dashboard', becomeGiver: 'Become a Giver', requester: 'Requester', browse: 'Open requests', notifications: 'Alerts', logout: 'Log out', login: 'Log in' },
+  auth: { loginTitle: 'Welcome back', registerTitle: 'Create your account', email: 'Email', password: 'Password', name: 'Full name', neighbourhood: 'Neighbourhood', neighbourhoodPlaceholder: 'e.g. Дебар Маало', neighbourhoodHint: 'Exact address is only shared after a booking is confirmed.', phone: 'Phone (optional)', phoneHint: 'Your number is only shared after a booking is confirmed.', signIn: 'Sign in', createAccount: 'Create account', continue: 'Continue', terms: 'By continuing you accept the community rules.', heroTitle: 'Someone two streets away is already doing that errand.', heroSub: 'Post the favor with your price, see Givers and their neighbourhoods, book one. You settle the money between yourselves.', login: 'Log in', register: 'Sign up', noAccount: 'No account yet?', haveAccount: 'Already have an account?' , roleLabel: 'I want to…', roles: {
+    REQUESTER: { title: 'Get help', hint: 'Post favors and book Givers.' },
+    GIVER: { title: 'Help others', hint: 'Offer your services and earn.' },
+    BOTH: { title: 'Both', hint: 'Post favors and help others.' },
+  } },
   dash: {
     morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening',
     summary: (live: number, confirmed: number) =>
       live === 0 && confirmed === 0 ? 'Nothing on the go right now — post a favor when you need a hand.'
         : `You have ${live === 1 ? 'one live request' : `${live} live requests`} and ${confirmed === 1 ? 'one confirmed booking' : `${confirmed} confirmed bookings`}.`,
-    completedCount: 'Requests completed', yourRating: 'Your rating', spentThisMonth: 'Spent this month', den: 'ден',
+    completedCount: 'Requests completed', yourRating: 'Your rating', den: 'ден',
     yourRequests: 'Your requests', noRequests: 'No requests yet.', open: 'Open',
     live: 'Live', requested: 'Requested', confirmed: 'Confirmed', rate: 'Rate', done: 'Done',
     matches: (n: number) => (n === 1 ? '1 match' : `${n} matches`),
@@ -15,6 +19,7 @@ export const en = {
     confirmedWith: (name: string) => `confirmed with ${name}`,
     completed: 'Completed', needsRating: 'needs rating', today: 'Today', tomorrow: 'Tomorrow', yesterday: 'yesterday',
     waitingOnRating: 'Waiting on your rating', ratingTwoWay: 'Rating is two-way — yours publishes once both sides have rated.',
+    becomeGiverEyebrow: 'Earn nearby', becomeGiverTitle: 'Help your neighbours', becomeGiverText: 'Pick what you can do and set your price. Requests from your area come straight to you.',
     rateName: (name: string) => `Rate ${name}`,
   },
   common: { loading: 'Loading…', empty: 'Nothing here yet.', save: 'Save', cancel: 'Cancel', back: 'Back', error: 'Something went wrong' },
@@ -22,6 +27,40 @@ export const en = {
   giver: { dashTitle: 'Giver home', onboardingTitle: 'Set up your giver profile', pickCategories: 'Pick what you do and set a price for each', bio: 'About you', save: 'Save profile', profile: 'Giver profile', rating: 'Rating', completed: 'completed', verified: 'Verified', browseTitle: 'Open requests', makeOffer: 'Send offer', offerMessage: 'Message', offerPrice: 'Your price (MKD)', myOffers: 'My offers' },
   booking: { title: 'My bookings', detail: 'Booking', status: 'Status', accept: 'Accept', decline: 'Decline', cancel: 'Cancel', complete: 'Mark complete', rate: 'Leave a review', contact: 'Contact', contactHidden: 'Phone number appears here once the booking is confirmed.', asRequester: 'As requester', asGiver: 'As giver' },
   rate: { title: 'Rate your experience', stars: 'Stars', text: 'Comment (optional)', submit: 'Submit review', blind: 'Reviews are hidden until you both submit, or 7 days pass.', done: 'Thanks — your review is in.' },
+  post: {
+    title: 'Post a favor', step: '1 of 1 · No in-app payment',
+    sub: "Describe what you need and what you'll pay. We'll show nearby Givers at a similar price straight away.",
+    category: '1 · Category', price: '2 · Your price', priceHint: 'We match Givers within ±25% of this.', matchRange: 'Match range:',
+    when: '3 · When', whenHint: 'An hour-period, not an exact minute.',
+    now: 'Now · next 2h', morning: 'This morning', afternoon: 'This afternoon', todaySlot: (from: string, to: string) => `Today ${from}–${to}`, tomorrow: 'Tomorrow', week: 'This week',
+    details: '4 · Description', titleLabel: 'Short title', titlePlaceholder: 'e.g. Pick up a prescription',
+    descPlaceholder: "Two bags from the pharmacy on Partizanska — prescription is already paid for, just needs collecting before 6pm. I'm on the 4th floor, no lift.",
+    neighbourhood: 'Neighbourhood', privacy: 'Exact address and phone are revealed only after the Giver accepts.',
+    cancel: 'Cancel', submit: 'Post & see matches',
+  },
+  gdash: {
+    eyebrow: 'Giver',
+    headline: (n: number) => n === 0 ? 'No new requests right now.'
+      : n === 1 ? 'One new request is waiting.'
+      : `${['Two', 'Three', 'Four', 'Five'][n - 2] ?? n} new requests are waiting.`,
+    sub: "Accept or decline — there's no chat, just an answer.",
+    editCategories: 'Edit categories', favorsDone: 'Favors done', avgRating: 'Average rating',
+    requestsForYou: 'Requests for you', noRequests: 'Nothing waiting. New booking requests will show up here.',
+    accept: 'Accept', decline: 'Decline',
+    sent: (n: number, unit: 'm' | 'h' | 'd') => n === 0 ? 'sent just now' : `sent ${n}${unit} ago`,
+    upcoming: 'Upcoming', open: 'Open', yourOffers: 'Your pending offers', withdraw: 'Withdraw',
+    recentRatings: 'Recent ratings', noRatings: 'No ratings yet. They appear once both sides have rated.',
+  },
+  onboard: {
+    title: 'What are you good at?',
+    sub: "Pick your categories and set a price for each. You'll show up automatically to Requesters looking for help at a similar price.",
+    yourCategories: 'Your categories', noneYet: 'No categories yet — add at least one below.',
+    trust: { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High' } as Record<'LOW' | 'MEDIUM' | 'HIGH', string>,
+    price: 'price', remove: 'Remove', addCategory: 'Add a category',
+    whereTitle: 'Where you are', whereHint: 'Shown as a neighbourhood, never an exact address.',
+    aboutTitle: 'About you', aboutHint: 'A sentence or two Requesters see on your profile.',
+    save: 'Save profile', needCategory: 'Add at least one category with a price.',
+  },
   notifications: { title: 'Alerts', todo: 'Notifications are not built yet (planned: backend notifications table + live updates).' },
 }
 export type Dict = typeof en

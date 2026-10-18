@@ -3,12 +3,16 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 import { SKOPJE_NEIGHBOURHOODS } from '../neighbourhoods'
+import type { SignupRole } from '../api/types'
+
+const ROLES: SignupRole[] = ['REQUESTER', 'GIVER', 'BOTH']
 
 export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   const { login, register } = useAuth()
   const { t, lang, setLang } = useI18n()
   const navigate = useNavigate()
   const [form, setForm] = useState({ displayName: '', email: '', password: '', neighbourhood: '', phone: '' })
+  const [role, setRole] = useState<SignupRole>('REQUESTER')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value })
@@ -18,9 +22,14 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
     setError(null)
     setBusy(true)
     try {
-      if (mode === 'login') await login(form.email, form.password)
-      else await register({ ...form, phone: form.phone || undefined })
-      navigate('/')
+      if (mode === 'login') {
+        await login(form.email, form.password)
+        navigate('/')
+      } else {
+        await register({ ...form, phone: form.phone || undefined, role })
+        // Givers need categories + prices before anyone can be matched to them.
+        navigate(role === 'REQUESTER' ? '/' : '/giver/onboarding')
+      }
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -47,6 +56,18 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             <NavLink to="/register" replace>{t.auth.createAccount}</NavLink>
           </div>
 
+          {mode === 'register' && (
+            <fieldset className="role-picker">
+              <legend>{t.auth.roleLabel}</legend>
+              {ROLES.map((r) => (
+                <label key={r} className={`role-option${role === r ? ' active' : ''}`}>
+                  <input type="radio" name="role" value={r} checked={role === r} onChange={() => setRole(r)} />
+                  <strong>{t.auth.roles[r].title}</strong>
+                  <span>{t.auth.roles[r].hint}</span>
+                </label>
+              ))}
+            </fieldset>
+          )}
           {mode === 'register' && (
             <div><label>{t.auth.name}</label><input value={form.displayName} onChange={set('displayName')} autoComplete="name" required /></div>
           )}

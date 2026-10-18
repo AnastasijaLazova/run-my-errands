@@ -28,6 +28,9 @@ public class AuthService {
         user.setDisplayName(request.displayName());
         user.setNeighbourhood(request.neighbourhood().trim());
         user.setPhone(request.phone());
+        // Giver-only accounts don't post favors. The giver flag itself is only set once the giver
+        // profile (categories + prices) is saved, since without prices nobody can be matched to them.
+        user.setRequester(!"GIVER".equals(request.role()));
         userRepository.save(user);
         return issueTokens(user);
     }

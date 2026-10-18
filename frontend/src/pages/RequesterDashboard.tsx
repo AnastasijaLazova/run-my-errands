@@ -7,13 +7,7 @@ import { initials } from '../components/Layout'
 import { useAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 import type { Dict } from '../i18n/en'
-
-// One tile colour per category so the list is scannable at a glance.
-const CATEGORY_COLORS: Record<string, string> = {
-  pharmacy: '#0F9D8A', pet_care: '#5B3FE0', laundry: '#6E9A1F', shopping: '#D9822B', bill_payment: '#2563EB',
-  yard_work: '#3F8F3A', babysitting: '#DB4F86', housework: '#8B5CF6', home_cooking: '#C2410C', cleaning: '#0891B2',
-  tutoring: '#4F46E5', vehicle_repair: '#475569', it_fixes: '#0E7490',
-}
+import { categoryColor } from '../categoryColors'
 
 /** 2100 → "2 100" — the space-grouped style used for денари. */
 export const formatDen = (n: number | null | undefined) =>
@@ -24,7 +18,7 @@ function greeting(t: Dict) {
   return h < 12 ? t.dash.morning : h < 18 ? t.dash.afternoon : t.dash.evening
 }
 
-function formatWhen(t: Dict, lang: string, iso: string | null) {
+export function formatWhen(t: Dict, lang: string, iso: string | null) {
   if (!iso) return t.favor.asap
   const d = new Date(iso)
   const today = new Date()
@@ -91,7 +85,6 @@ export default function RequesterDashboard() {
                 <span>{t.dash.yourRating}</span>
                 <strong className="accent">{data.stats.ratingCount > 0 ? data.stats.ratingAvg.toFixed(1) : '—'}</strong>
               </div>
-              <div className="stat"><span>{t.dash.spentThisMonth}</span><strong>{formatDen(data.stats.spentThisMonth)} {t.dash.den}</strong></div>
             </div>
           </section>
 
@@ -104,7 +97,7 @@ export default function RequesterDashboard() {
                 const price = r.booking?.price ?? r.budget
                 return (
                   <div className="card request-row" key={r.favorId}>
-                    <span className="tile" style={{ background: CATEGORY_COLORS[r.categoryKey] ?? 'var(--accent)' }}>{r.title.trim()[0]?.toUpperCase()}</span>
+                    <span className="tile" style={{ background: categoryColor(r.categoryKey) }}>{r.title.trim()[0]?.toUpperCase()}</span>
                     <div className="request-text">
                       <strong>{r.title}</strong>
                       <span className="muted">{d.detail}</span>
@@ -117,24 +110,34 @@ export default function RequesterDashboard() {
               })}
             </section>
 
-            {data.toRate.length > 0 && (
-              <aside className="card side-card">
-                <h3>{t.dash.waitingOnRating}</h3>
-                <p className="muted small">{t.dash.ratingTwoWay}</p>
-                {data.toRate.map((r) => (
-                  <div key={r.bookingId} className="stack">
-                    <div className="person-box">
-                      <span className="avatar dark">{initials(r.giverName ?? '')}</span>
-                      <div>
-                        <strong>{r.giverName}</strong>
-                        <div className="muted small">{r.favorTitle} · {formatDay(t, lang, r.completedAt)}</div>
+            <div className="side-col">
+              {me && !me.giver && (
+                <aside className="card side-card become-giver">
+                  <span className="eyebrow">{t.dash.becomeGiverEyebrow}</span>
+                  <h3>{t.dash.becomeGiverTitle}</h3>
+                  <p className="muted">{t.dash.becomeGiverText}</p>
+                  <Link to="/giver/onboarding" className="button primary block">{t.nav.becomeGiver}</Link>
+                </aside>
+              )}
+              {data.toRate.length > 0 && (
+                <aside className="card side-card">
+                  <h3>{t.dash.waitingOnRating}</h3>
+                  <p className="muted small">{t.dash.ratingTwoWay}</p>
+                  {data.toRate.map((r) => (
+                    <div key={r.bookingId} className="stack">
+                      <div className="person-box">
+                        <span className="avatar dark">{initials(r.giverName ?? '')}</span>
+                        <div>
+                          <strong>{r.giverName}</strong>
+                          <div className="muted small">{r.favorTitle} · {formatDay(t, lang, r.completedAt)}</div>
+                        </div>
                       </div>
+                      <Link to={`/bookings/${r.bookingId}/rate`} className="button primary block">{t.dash.rateName((r.giverName ?? '').split(' ')[0])}</Link>
                     </div>
-                    <Link to={`/bookings/${r.bookingId}/rate`} className="button primary block">{t.dash.rateName((r.giverName ?? '').split(' ')[0])}</Link>
-                  </div>
-                ))}
-              </aside>
-            )}
+                  ))}
+                </aside>
+              )}
+            </div>
           </div>
         </>
       )}

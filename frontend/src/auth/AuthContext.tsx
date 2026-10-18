@@ -1,13 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { authApi, meApi } from '../api/endpoints'
 import { tokenStore } from '../api/client'
-import type { Me } from '../api/types'
+import type { Me, SignupInput } from '../api/types'
 
 interface AuthState {
   me: Me | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (b: { email: string; password: string; displayName: string; neighbourhood: string; phone?: string }) => Promise<void>
+  register: (b: SignupInput) => Promise<void>
   logout: () => void
   refreshMe: () => Promise<void>
 }
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     tokenStore.set(res.accessToken)
     await refreshMe()
   }
-  const register = async (b: { email: string; password: string; displayName: string; neighbourhood: string; phone?: string }) => {
+  const register = async (b: SignupInput) => {
     const res = await authApi.signup(b)
     tokenStore.set(res.accessToken)
     await refreshMe()

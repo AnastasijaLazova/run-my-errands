@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { useAuth } from './auth/AuthContext'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthPage from './pages/AuthPage'
@@ -14,6 +15,13 @@ import Browse from './pages/Browse'
 import GiverOnboarding from './pages/GiverOnboarding'
 import Notifications from './pages/Notifications'
 
+/** Giver-only accounts have no requester dashboard: send them to the giver side (or its setup). */
+function Home() {
+  const { me } = useAuth()
+  if (me && !me.requester) return <Navigate to={me.giver ? '/giver' : '/giver/onboarding'} replace />
+  return <RequesterDashboard />
+}
+
 export default function App() {
   return (
     <Routes>
@@ -21,7 +29,7 @@ export default function App() {
       <Route path="/register" element={<AuthPage mode="register" />} />
       <Route element={<Layout />}>
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<RequesterDashboard />} />
+          <Route path="/" element={<Home />} />
           <Route path="/post" element={<PostFavor />} />
           <Route path="/favors/:id/matches" element={<Matches />} />
           <Route path="/givers/:id" element={<GiverProfilePage />} />

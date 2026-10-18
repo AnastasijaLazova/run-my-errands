@@ -2,6 +2,9 @@
 
 export interface AuthResponse { accessToken: string; refreshToken: string; userId: number; displayName: string }
 
+export type SignupRole = 'REQUESTER' | 'GIVER' | 'BOTH'
+export interface SignupInput { email: string; password: string; displayName: string; neighbourhood: string; phone?: string; role: SignupRole }
+
 export interface Me {
   id: number; email: string; displayName: string; phone: string | null; neighbourhood: string
   avatarUrl: string | null; locale: 'en' | 'mk'; requester: boolean; giver: boolean
@@ -58,6 +61,16 @@ export interface RequesterDashboard {
   stats: { completedCount: number; ratingAvg: number; ratingCount: number; spentThisMonth: number }
   requests: DashboardRequest[]
   toRate: { bookingId: number; giverName: string | null; favorTitle: string; completedAt: string | null }[]
+}
+
+export interface GiverDashboard {
+  stats: { completedCount: number; ratingAvg: number; ratingCount: number }
+  requests: {
+    bookingId: number; requesterName: string | null; categoryKey: string; categoryNameEn: string; categoryNameMk: string
+    neighbourhood: string; whenType: 'ASAP' | 'SCHEDULED'; whenAt: string | null; price: number | null; note: string | null; requestedAt: string
+  }[]
+  upcoming: { bookingId: number; requesterName: string | null; favorTitle: string; whenType: 'ASAP' | 'SCHEDULED'; whenAt: string | null; price: number | null }[]
+  recentRatings: { authorName: string | null; stars: number; text: string | null; publishedAt: string }[]
 }
 
 export interface ReviewStatus { mineSubmitted: boolean; theirsSubmitted: boolean; published: boolean }

@@ -2,7 +2,7 @@ import { api } from './client'
 import type * as T from './types'
 
 export const authApi = {
-  signup: (b: { email: string; password: string; displayName: string; neighbourhood: string; phone?: string }) =>
+  signup: (b: T.SignupInput) =>
     api<T.AuthResponse>('/auth/signup', { method: 'POST', body: b }),
   login: (b: { email: string; password: string }) =>
     api<T.AuthResponse>('/auth/login', { method: 'POST', body: b }),
@@ -11,6 +11,7 @@ export const authApi = {
 export const meApi = {
   get: () => api<T.Me>('/me'),
   requesterDashboard: () => api<T.RequesterDashboard>('/me/dashboard/requester'),
+  giverDashboard: () => api<T.GiverDashboard>('/me/dashboard/giver'),
   update: (b: Partial<Pick<T.Me, 'displayName' | 'phone' | 'neighbourhood' | 'avatarUrl' | 'locale'>>) =>
     api<T.Me>('/me', { method: 'PATCH', body: b }),
   saveGiverProfile: (b: {

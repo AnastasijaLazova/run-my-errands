@@ -8,7 +8,7 @@ export function initials(name: string) {
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?'
 }
 
-/** Name chip in the header; click opens a small menu with the giver dashboard and log out. */
+/** Name chip in the header; click opens a small menu with the giver dashboard (or giver setup) and log out. */
 function UserMenu() {
   const { me, logout } = useAuth()
   const { t } = useI18n()
@@ -34,7 +34,9 @@ function UserMenu() {
       </button>
       {open && (
         <div className="menu">
-          <Link to="/giver">{t.nav.giverHome}</Link>
+          {me.giver
+            ? <Link to="/giver">{t.nav.giverHome}</Link>
+            : <Link to="/giver/onboarding">{t.nav.becomeGiver}</Link>}
           <button onClick={() => { logout(); navigate('/login') }}>{t.nav.logout}</button>
         </div>
       )}
@@ -54,8 +56,8 @@ export default function Layout() {
           {me && (
             <nav className="nav">
               <NavLink to="/" end>{t.nav.home}</NavLink>
-              <NavLink to="/post">{t.nav.post}</NavLink>
-              <NavLink to="/browse">{t.nav.browse}</NavLink>
+              {me.requester && <NavLink to="/post">{t.nav.post}</NavLink>}
+              {me.giver && <NavLink to="/browse">{t.nav.browse}</NavLink>}
               <NavLink to="/bookings">{t.nav.bookings}</NavLink>
             </nav>
           )}

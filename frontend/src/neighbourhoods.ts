@@ -1,8 +1,7 @@
 // Suggestions for the neighbourhood field — free text is still allowed, this just keeps spelling consistent.
 export const SKOPJE_NEIGHBOURHOODS = [
-  'Aerodrom', 'Avtokomanda', 'Bit Pazar', 'Bunjakovec', 'Butel', 'Centar', 'Čair', 'Debar Maalo',
-  'Dračevo', 'Gazi Baba', 'Gjorče Petrov', 'Hipodrom', 'Jane Sandanski', 'Kapištec', 'Karpoš 1',
-  'Karpoš 2', 'Karpoš 3', 'Karpoš 4', 'Kisela Voda', 'Kozle', 'Lisiče', 'Madžir Maalo', 'Novo Lisiče',
-  'Pripor', 'Przino', 'Šuto Orizari', 'Taftalidže 1', 'Taftalidže 2', 'Topaana', 'Vlae', 'Vodno',
-  'Zelezara', 'Zlokukjani',
+  'Аеродром', 'Автокоманда', 'Бит Пазар', 'Бутел', 'Буњаковец', 'Влае', 'Водно', 'Гази Баба', 'Дебар Маало',
+  'Драчево', 'Ѓорче Петров', 'Железара', 'Злокуќани', 'Јане Сандански', 'Капиштец', 'Карпош 1', 'Карпош 2',
+  'Карпош 3', 'Карпош 4', 'Кисела Вода', 'Козле', 'Лисиче', 'Маџир Маало', 'Ново Лисиче', 'Припор', 'Пржино',
+  'Тафталиџе 1', 'Тафталиџе 2', 'Топаана', 'Хиподром', 'Центар', 'Чаир', 'Шуто Оризари',
 ]

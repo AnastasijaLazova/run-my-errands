@@ -2,12 +2,16 @@ package com.runmyerrands.dashboard;
 
 import com.runmyerrands.booking.Booking;
 import com.runmyerrands.booking.BookingRepository;
+import com.runmyerrands.dashboard.dto.GiverDashboardDto;
 import com.runmyerrands.dashboard.dto.RequesterDashboardDto;
 import com.runmyerrands.dashboard.dto.RequesterDashboardDto.*;
 import com.runmyerrands.favor.Favor;
 import com.runmyerrands.favor.FavorRepository;
 import com.runmyerrands.favor.FavorService;
+import com.runmyerrands.review.Review;
 import com.runmyerrands.review.ReviewRepository;
+import com.runmyerrands.user.GiverProfile;
+import com.runmyerrands.user.GiverProfileRepository;
 import com.runmyerrands.user.User;
 import com.runmyerrands.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +26,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Everything the requester home screen shows, in one call. */
+/** Everything the requester and giver home screens show, one call each. */
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
@@ -38,6 +42,7 @@ public class DashboardService {
     private final BookingRepository bookingRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final GiverProfileRepository giverProfileRepository;
 
     @Transactional(readOnly = true)
     public RequesterDashboardDto requester(User me) {
@@ -92,5 +97,59 @@ public class DashboardService {
 
         Stats stats = new Stats(done.size(), me.getRequesterRatingAvg(), me.getRequesterRatingCount(), spent);
         return new RequesterDashboardDto(stats, rows, toRate);
+    }
+
+    @Transactional(readOnly = true)
+    public GiverDashboardDto giver(User me) {
+        List<Booking> bookings = bookingRepository.findByGiverIdOrderByRequestedAtDesc(me.getId());
+
+        Map<Long, String> requesterNames = userRepository.findAllById(
+                        bookings.stream().map(Booking::getRequesterId).collect(Collectors.toSet())).stream()
+                .collect(Collectors.toMap(User::getId, User::getDisplayName));
+        Map<Long, Favor> favors = favorRepository.findAllById(
+                        bookings.stream().map(Booking::getFavorId).collect(Collectors.toSet())).stream()
+                .collect(Collectors.toMap(Favor::getId, Function.identity()));
+
+        List<GiverDashboardDto.IncomingRequest> requests = bookings.stream()
+                .filter(b -> b.getStatus() == Booking.Status.REQUESTED)
+                .map(b -> {
+                    Favor f = favors.get(b.getFavorId());
+                    return new GiverDashboardDto.IncomingRequest(b.getId(), requesterNames.get(b.getRequesterId()),
+                            f.getCategory().getKey(), f.getCategory().getNameEn(), f.getCategory().getNameMk(),
+                            f.getNeighbourhood(), f.getWhenType().name(), f.getWhenAt(),
+                            b.getPrice() != null ? b.getPrice() : f.getBudget(),
+                            b.getNote() != null && !b.getNote().isBlank() ? b.getNote() : f.getDescription(),
+                            b.getRequestedAt());
+                })
+                .toList();
+
+        List<GiverDashboardDto.Upcoming> upcoming = bookings.stream()
+                .filter(b -> b.getStatus() == Booking.Status.CONFIRMED)
+                .map(b -> {
+                    Favor f = favors.get(b.getFavorId());
+                    return new GiverDashboardDto.Upcoming(b.getId(), requesterNames.get(b.getRequesterId()),
+                            f.getTitle(), f.getWhenType().name(), f.getWhenAt(),
+                            b.getPrice() != null ? b.getPrice() : f.getBudget());
+                })
+                .toList();
+
+        // Only ratings received as a giver — the same user can also be rated as a requester.
+        Set<Long> giverBookingIds = bookings.stream().map(Booking::getId).collect(Collectors.toSet());
+        List<Review> reviews = reviewRepository.findByTargetIdAndPublishedAtIsNotNullOrderByPublishedAtDesc(me.getId())
+                .stream().filter(r -> giverBookingIds.contains(r.getBookingId())).limit(5).toList();
+        Map<Long, String> authorNames = userRepository.findAllById(
+                        reviews.stream().map(Review::getAuthorId).collect(Collectors.toSet())).stream()
+                .collect(Collectors.toMap(User::getId, User::getDisplayName));
+        List<GiverDashboardDto.RecentRating> recentRatings = reviews.stream()
+                .map(r -> new GiverDashboardDto.RecentRating(authorNames.get(r.getAuthorId()), r.getStars(),
+                        r.getText(), r.getPublishedAt()))
+                .toList();
+
+        int completed = (int) bookings.stream().filter(b -> DONE.contains(b.getStatus())).count();
+        Optional<GiverProfile> profile = giverProfileRepository.findByUserId(me.getId());
+        GiverDashboardDto.Stats stats = new GiverDashboardDto.Stats(completed,
+                profile.map(GiverProfile::getRatingAvg).orElse(BigDecimal.ZERO),
+                profile.map(GiverProfile::getRatingCount).orElse(0));
+        return new GiverDashboardDto(stats, requests, upcoming, recentRatings);
     }
 }
