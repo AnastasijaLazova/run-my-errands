@@ -9,6 +9,7 @@ import com.runmyerrands.user.GiverCategoryRepository;
 import com.runmyerrands.user.User;
 import com.runmyerrands.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final GiverCategoryRepository giverCategoryRepository;
     private final OfferRepository offerRepository;
+    private final ApplicationEventPublisher events;
 
     /** Path 1: Requester books a Giver directly from Matches. Starts at REQUESTED. */
     @Transactional
@@ -46,6 +48,14 @@ public class BookingService {
         if (request.giverId().equals(requester.getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can't book yourself");
         }
+        // Only someone who offers this category (and so appears in Matches) can be booked, at their listed price.
+        boolean isGiver = userRepository.findById(request.giverId()).map(User::isGiver).orElse(false);
+        BigDecimal price = !isGiver ? null : giverCategoryRepository.findByUserId(request.giverId()).stream()
+                .filter(gc -> gc.getCategory().getId().equals(favor.getCategory().getId()))
+                .map(gc -> gc.getPrice()).findFirst().orElse(null);
+        if (price == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This person doesn't offer help in this category");
+        }
 
         Booking booking = new Booking();
         booking.setFavorId(favor.getId());
@@ -53,15 +63,14 @@ public class BookingService {
         booking.setGiverId(request.giverId());
         booking.setOrigin(Booking.Origin.DIRECT_REQUEST);
         booking.setNote(request.note());
-        booking.setPrice(giverCategoryRepository.findByUserId(request.giverId()).stream()
-                .filter(gc -> gc.getCategory().getId().equals(favor.getCategory().getId()))
-                .map(gc -> gc.getPrice()).findFirst().orElse(favor.getBudget()));
+        booking.setPrice(price);
         bookingRepository.save(booking);
 
         favor.setStatus(Favor.Status.BOOKED);
         favorRepository.save(favor);
         // The requester chose someone directly, so pending offers on this favor can no longer be accepted.
         offerRepository.updateStatusForFavor(favor.getId(), Offer.Status.PENDING, Offer.Status.EXPIRED);
+        events.publishEvent(new BookingStatusChanged(booking.getId(), requester.getId()));
         return BookingDto.from(booking);
     }
 
@@ -102,7 +111,9 @@ public class BookingService {
             setFavorStatus(booking.getFavorId(), Favor.Status.OPEN);
         }
         if (event == BookingStateMachine.Event.COMPLETE) setFavorStatus(booking.getFavorId(), Favor.Status.CLOSED);
-        return BookingDto.from(bookingRepository.save(booking));
+        bookingRepository.save(booking);
+        events.publishEvent(new BookingStatusChanged(booking.getId(), actor.getId()));
+        return BookingDto.from(booking);
     }
 
     /** Called by BookingLifecycleJob for a REQUESTED booking the giver never answered. Reopens the favor. */
@@ -113,6 +124,7 @@ public class BookingService {
         booking.setRespondedAt(Instant.now());
         bookingRepository.save(booking);
         setFavorStatus(booking.getFavorId(), Favor.Status.OPEN);
+        events.publishEvent(new BookingStatusChanged(booking.getId(), null));
     }
 
     /** COMPLETED -> CLOSED once both reviews are in (ReviewService) or the review window ends (BookingLifecycleJob). */

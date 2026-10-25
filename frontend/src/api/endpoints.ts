@@ -62,3 +62,10 @@ export const reviewsApi = {
     api(`/bookings/${bookingId}/review`, { method: 'POST', body: b }),
   status: (bookingId: number) => api<T.ReviewStatus>(`/bookings/${bookingId}/review-status`),
 }
+
+export const notificationsApi = {
+  list: () => api<T.AppNotification[]>('/notifications'),
+  unreadCount: () => api<{ count: number }>('/notifications/unread-count'),
+  markRead: (id: number) => api<void>(`/notifications/${id}/read`, { method: 'POST' }),
+  markAllRead: () => api<void>('/notifications/read-all', { method: 'POST' }),
+}

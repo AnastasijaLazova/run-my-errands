@@ -77,3 +77,12 @@ export interface GiverDashboard {
 }
 
 export interface ReviewStatus { mineSubmitted: boolean; theirsSubmitted: boolean; published: boolean }
+
+export type NotificationType =
+  | 'BOOKING_REQUESTED' | 'BOOKING_ACCEPTED' | 'BOOKING_DECLINED' | 'BOOKING_CANCELLED' | 'BOOKING_COMPLETED'
+  | 'BOOKING_EXPIRED' | 'OFFER_RECEIVED' | 'OFFER_ACCEPTED' | 'OFFER_REJECTED' | 'REVIEW_RECEIVED'
+
+export interface AppNotification {
+  id: number; type: NotificationType; bookingId: number | null; offerId: number | null; favorId: number | null
+  actorName: string | null; favorTitle: string | null; createdAt: string; read: boolean
+}

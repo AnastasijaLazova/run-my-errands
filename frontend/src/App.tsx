@@ -33,6 +33,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/post" element={<PostFavor />} />
           <Route path="/favors/:id/matches" element={<Matches />} />
+          <Route path="/favors/:id/edit" element={<PostFavor />} />
           <Route path="/givers/:id" element={<GiverProfilePage />} />
           <Route path="/bookings" element={<MyBookings />} />
           <Route path="/bookings/:id" element={<BookingDetail />} />

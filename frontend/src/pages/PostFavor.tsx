@@ -1,5 +1,5 @@
-import { useMemo, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { categoriesApi, favorsApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
 import { useI18n } from '../i18n/I18nContext'
@@ -7,13 +7,14 @@ import type { Dict } from '../i18n/en'
 import { useAuth } from '../auth/AuthContext'
 import { NeighbourhoodInput } from '../components/NeighbourhoodInput'
 import { categoryColor } from '../categoryColors'
-import { formatDen } from './RequesterDashboard'
+import { formatDen, formatWhen } from './RequesterDashboard'
 
 const PRICE_MIN = 100
 const PRICE_MAX = 2000
 const PRICE_TOLERANCE = 0.25 // must match FavorService.PRICE_TOLERANCE_PCT
 
-type SlotKey = 'now' | 'morning' | 'afternoon' | 'todaySlot' | 'tomorrow' | 'week'
+// 'current' only exists when editing a scheduled favor: keep the time it already has.
+type SlotKey = 'current' | 'now' | 'morning' | 'afternoon' | 'todaySlot' | 'tomorrow' | 'week'
 type Slot = { key: SlotKey; label: string; start: Date | null; available: boolean }
 
 const at = (now: Date, dayOffset: number, hour: number) => {
@@ -39,14 +40,20 @@ function buildSlots(t: Dict, now: Date): Slot[] {
   ]
 }
 
+/** Posts a new favor, or edits one at /favors/:id/edit (same form; the category is locked once posted). */
 export default function PostFavor() {
   const { t, lang } = useI18n()
   const navigate = useNavigate()
   const { me } = useAuth()
+  const params = useParams()
+  const editId = params.id ? Number(params.id) : null
   const { data: categories } = useAsync(() => categoriesApi.list())
+  const existing = useAsync(() => (editId ? favorsApi.get(editId) : Promise.resolve(null)), [editId])
 
   const [categoryId, setCategoryId] = useState<number | null>(null)
   const [price, setPrice] = useState(450)
+  // When editing, only send the price if it was moved, so a budget outside the slider range isn't clamped.
+  const [priceTouched, setPriceTouched] = useState(false)
   const [slotKey, setSlotKey] = useState<SlotKey>('now')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -56,8 +63,24 @@ export default function PostFavor() {
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
-  const slots = useMemo(() => buildSlots(t, new Date()), [t])
+  const favor = existing.data
+  useEffect(() => {
+    if (!favor) return
+    setCategoryId(favor.categoryId)
+    setTitle(favor.title)
+    setDescription(favor.description ?? '')
+    setNeighbourhood(favor.neighbourhood)
+    if (favor.budget != null) setPrice(Math.min(PRICE_MAX, Math.max(PRICE_MIN, favor.budget)))
+    setSlotKey(favor.whenType === 'SCHEDULED' && favor.whenAt ? 'current' : 'now')
+  }, [favor])
+
+  const slots = useMemo(() => {
+    const base = buildSlots(t, new Date())
+    if (favor?.whenType !== 'SCHEDULED' || !favor.whenAt) return base
+    return [{ key: 'current' as const, label: formatWhen(t, lang, favor.whenAt), start: new Date(favor.whenAt), available: true }, ...base]
+  }, [t, lang, favor])
   const selectedCategory = categoryId ?? categories?.[0]?.id ?? null
+  const visibleCategories = editId ? categories?.filter((c) => c.id === selectedCategory) : categories
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -66,6 +89,17 @@ export default function PostFavor() {
     setError(null)
     setSaving(true)
     try {
+      if (editId) {
+        await favorsApi.update(editId, {
+          title,
+          description,
+          neighbourhood,
+          ...(priceTouched ? { budget: price } : {}),
+          ...(slot.key === 'current' ? {} : { whenType: slot.start ? 'SCHEDULED' : 'ASAP', whenAt: slot.start?.toISOString() }),
+        })
+        navigate(`/favors/${editId}/matches`)
+        return
+      }
       const favor = await favorsApi.create({
         categoryId: selectedCategory,
         title,
@@ -87,18 +121,23 @@ export default function PostFavor() {
   return (
     <form className="post-favor" onSubmit={submit}>
       <header className="post-head">
-        <h1>{t.post.title} <span className="post-step">{t.post.step}</span></h1>
+        {editId
+          ? <h1>{t.post.editTitle}</h1>
+          : <h1>{t.post.title} <span className="post-step">{t.post.step}</span></h1>}
         <p className="muted">{t.post.sub}</p>
       </header>
+      {existing.error && <p className="error">{existing.error}</p>}
+      {favor && favor.status !== 'OPEN' && <p className="error">{t.post.notEditable}</p>}
 
       <section className="card post-card">
         <h2>{t.post.category}</h2>
+        {editId && <p className="muted small">{t.post.categoryLocked}</p>}
         <div className="chip-row">
-          {categories?.map((c) => {
+          {visibleCategories?.map((c) => {
             const name = lang === 'mk' ? c.nameMk : c.nameEn
             const active = c.id === selectedCategory
             return (
-              <button type="button" key={c.id} className={`chip${active ? ' active' : ''}`} aria-pressed={active} onClick={() => setCategoryId(c.id)}>
+              <button type="button" key={c.id} className={`chip${active ? ' active' : ''}`} aria-pressed={active} disabled={editId != null} onClick={() => setCategoryId(c.id)}>
                 <span className="chip-tile" style={{ background: categoryColor(c.key) }}>{name.trim()[0]?.toUpperCase()}</span>
                 {name}
               </button>
@@ -114,7 +153,7 @@ export default function PostFavor() {
           <div className="price-big">{formatDen(price)} <span>{t.dash.den}</span></div>
           <input
             type="range" className="slider" min={PRICE_MIN} max={PRICE_MAX} step={10} value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
+            onChange={(e) => { setPrice(Number(e.target.value)); setPriceTouched(true) }}
             style={{ background: `linear-gradient(to right, var(--accent) ${fillPct}%, var(--line) ${fillPct}%)` }}
             aria-label={t.post.price}
           />
@@ -145,7 +184,7 @@ export default function PostFavor() {
         <div className="post-fields">
           <div>
             <label htmlFor="pf-title">{t.post.titleLabel}</label>
-            <input id="pf-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t.post.titlePlaceholder} required />
+            <input id="pf-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t.post.titlePlaceholder} maxLength={200} required />
           </div>
           <div>
             <label htmlFor="pf-hood">{t.post.neighbourhood}</label>
@@ -153,7 +192,7 @@ export default function PostFavor() {
           </div>
         </div>
         <textarea
-          className="post-desc" rows={4} value={description} onChange={(e) => setDescription(e.target.value)}
+          className="post-desc" rows={4} maxLength={2000} value={description} onChange={(e) => setDescription(e.target.value)}
           placeholder={t.post.descPlaceholder} aria-label={t.post.details}
         />
         <label className="check">
@@ -164,8 +203,10 @@ export default function PostFavor() {
 
       {error && <p className="error">{error}</p>}
       <div className="post-actions">
-        <Link to="/" className="button lg">{t.post.cancel}</Link>
-        <button type="submit" className="primary lg" disabled={!categories || saving}>{t.post.submit}</button>
+        <Link to={editId ? `/favors/${editId}/matches` : '/'} className="button lg">{t.post.cancel}</Link>
+        <button type="submit" className="primary lg" disabled={!categories || saving || (editId != null && favor?.status !== 'OPEN')}>
+          {editId ? t.post.saveChanges : t.post.submit}
+        </button>
       </div>
     </form>
   )

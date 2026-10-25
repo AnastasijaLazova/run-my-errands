@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { bookingsApi, favorsApi, meApi, offersApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
+import { useLiveRefresh } from '../notifications/NotificationsContext'
 import { Async } from '../components/Status'
 import { initials } from '../components/Layout'
 import { useI18n } from '../i18n/I18nContext'
@@ -28,6 +29,7 @@ function sentAgo(t: Dict, iso: string) {
 export default function GiverDashboard() {
   const { t, lang } = useI18n()
   const dash = useAsync(() => meApi.giverDashboard())
+  useLiveRefresh(() => { dash.refresh(); offers.refresh() })
   // Pending offers this giver sent on open favors, with the favor title for context.
   const offers = useAsync(async () => {
     const pending = (await offersApi.mine()).filter((o) => o.status === 'PENDING')

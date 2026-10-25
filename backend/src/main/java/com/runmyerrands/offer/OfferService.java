@@ -9,12 +9,14 @@ import com.runmyerrands.offer.dto.CreateOfferRequest;
 import com.runmyerrands.offer.dto.OfferDto;
 import com.runmyerrands.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,10 +28,15 @@ public class OfferService {
     private final OfferRepository offerRepository;
     private final FavorRepository favorRepository;
     private final BookingService bookingService;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public OfferDto create(User giver, Long favorId, CreateOfferRequest request) {
-        Favor favor = favorRepository.findById(favorId)
+        if (!giver.isGiver()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Set up your giver profile before sending offers");
+        }
+        // Locked so two offers arriving together can't both slip under the cap.
+        Favor favor = favorRepository.findByIdForUpdate(favorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Favor not found"));
         if (favor.getRequesterId().equals(giver.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can't offer on your own favor");
@@ -37,7 +44,8 @@ public class OfferService {
         if (favor.getStatus() != Favor.Status.OPEN) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This favor is no longer open");
         }
-        if (offerRepository.findByFavorId(favorId).size() >= MAX_OFFERS_PER_FAVOR) {
+        // Rejected/withdrawn/expired offers don't count, or a favor would fill up with dead ones.
+        if (offerRepository.countByFavorIdAndStatus(favorId, Offer.Status.PENDING) >= MAX_OFFERS_PER_FAVOR) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This favor already has the maximum number of offers");
         }
 
@@ -48,11 +56,13 @@ public class OfferService {
         offer.setProposedPrice(request.proposedPrice());
         offer.setProposedTime(request.proposedTime());
         try {
-            return OfferDto.from(offerRepository.saveAndFlush(offer));
+            offerRepository.saveAndFlush(offer);
         } catch (DataIntegrityViolationException e) {
             // partial unique index: one PENDING offer per (favor, giver)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You already have a pending offer on this favor");
         }
+        events.publishEvent(new OfferStatusChanged(offer.getId()));
+        return OfferDto.from(offer);
     }
 
     /** Only the favor's owner may list the offers on it. */
@@ -92,11 +102,14 @@ public class OfferService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This offer is no longer pending");
         }
 
+        List<Long> changed = new ArrayList<>();
         for (Offer other : offerRepository.findByFavorId(favor.getId())) {
             if (other.getId().equals(offer.getId())) {
                 other.setStatus(Offer.Status.ACCEPTED);
+                changed.add(other.getId());
             } else if (other.getStatus() == Offer.Status.PENDING) {
                 other.setStatus(Offer.Status.REJECTED);
+                changed.add(other.getId());
             }
             offerRepository.save(other);
         }
@@ -106,6 +119,8 @@ public class OfferService {
         Booking booking = bookingService.createFromAcceptedOffer(
                 favor.getId(), requester.getId(), offer.getGiverId(), offer.getId(),
                 offer.getProposedPrice() != null ? offer.getProposedPrice() : favor.getBudget());
+        // After the booking exists, so the accepted giver's notification can link to it.
+        changed.forEach(id -> events.publishEvent(new OfferStatusChanged(id)));
         return BookingDto.from(booking);
     }
 
@@ -122,7 +137,9 @@ public class OfferService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This offer is no longer pending");
         }
         offer.setStatus(Offer.Status.REJECTED);
-        return OfferDto.from(offerRepository.save(offer));
+        offerRepository.save(offer);
+        events.publishEvent(new OfferStatusChanged(offer.getId()));
+        return OfferDto.from(offer);
     }
 
     @Transactional

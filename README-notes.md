@@ -38,7 +38,11 @@ contact reveal, blind reviews + rating aggregates, all main screens, EN/MK langu
 Booking a giver directly expires the favor's pending offers. `/auth/refresh` + `/auth/logout` (logout revokes all of
 the user's tokens via `users.token_version`), `PATCH`/`DELETE /favors/{id}` (open favors only).
 
-**Not built yet:** notifications (page is a placeholder), UI for editing/cancelling a favor, map view, tests,
+**Notifications:** booking/offer/review services publish domain events; `NotificationListener` stores one row per
+recipient and pushes it over SSE (`GET /notifications/stream`) after commit. The connection registry is in memory,
+so live push assumes a single backend instance.
+
+**Not built yet:** map view, tests,
 rate limiting, Docker deployment.
 
 **Honesty note:** the frontend was compiled (`tsc` + `vite build`) successfully. The backend has **not** been

@@ -1,6 +1,6 @@
 export const en = {
   appName: 'Run My Errands',
-  nav: { home: 'Home', post: 'Post a favor', bookings: 'My bookings', giverHome: 'Giver dashboard', becomeGiver: 'Become a Giver', requester: 'Requester', browse: 'Open requests', notifications: 'Alerts', settings: 'Settings', logout: 'Log out', login: 'Log in' },
+  nav: { home: 'Home', post: 'Post a favor', postShort: 'Post', browseShort: 'Requests', bookingsShort: 'Bookings', profile: 'Profile', bookings: 'My bookings', giverHome: 'Giver dashboard', becomeGiver: 'Become a Giver', requester: 'Requester', browse: 'Open requests', notifications: 'Alerts', settings: 'Settings', logout: 'Log out', login: 'Log in' },
   auth: { loginTitle: 'Welcome back', registerTitle: 'Create your account', email: 'Email', password: 'Password', name: 'Full name', neighbourhood: 'Neighbourhood', neighbourhoodPlaceholder: 'e.g. Debar Maalo', neighbourhoodHint: 'Exact address is only shared after a booking is confirmed.', phone: 'Phone (optional)', phoneHint: 'Your number is only shared after a booking is confirmed.', signIn: 'Sign in', createAccount: 'Create account', continue: 'Continue', terms: 'By continuing you accept the community rules.', heroTitle: 'Someone two streets away is already doing that errand.', heroSub: 'Post the favor with your price, see Givers and their neighbourhoods, book one. You settle the money between yourselves.', login: 'Log in', register: 'Sign up', noAccount: 'No account yet?', haveAccount: 'Already have an account?' , roleLabel: 'I want to…', roles: {
     REQUESTER: { title: 'Get help', hint: 'Post favors and book Givers.' },
     GIVER: { title: 'Help others', hint: 'Offer your services and earn.' },
@@ -23,11 +23,11 @@ export const en = {
     rateName: (name: string) => `Rate ${name}`,
   },
   common: { loading: 'Loading…', empty: 'Nothing here yet.', save: 'Save', cancel: 'Cancel', back: 'Back', error: 'Something went wrong' },
-  favor: { postTitle: 'Request a favor', category: 'Category', title: 'What do you need?', description: 'Details', budget: 'Your price (MKD)', when: 'When', asap: 'As soon as possible', scheduled: 'Pick a date & time', neighbourhood: 'Neighbourhood', submit: 'Find givers', mine: 'My requests', matches: 'Available givers', noMatches: 'No givers match yet — try a different price or check back later.', book: 'Request booking', offers: 'Offers received', byRating: 'Top rated', byPrice: 'Lowest price' },
+  favor: { postTitle: 'Request a favor', category: 'Category', title: 'What do you need?', description: 'Details', budget: 'Your price (MKD)', when: 'When', asap: 'As soon as possible', scheduled: 'Pick a date & time', neighbourhood: 'Neighbourhood', submit: 'Find givers', mine: 'My requests', matches: 'Available givers', noMatches: 'No givers match yet — try a different price or check back later.', book: 'Request booking', offers: 'Offers received', byRating: 'Top rated', byPrice: 'Lowest price', edit: 'Edit request', cancelFavor: 'Cancel request', cancelConfirm: 'Cancel this request? Any pending offers on it will be withdrawn.' },
   giver: { dashTitle: 'Giver home', onboardingTitle: 'Set up your giver profile', pickCategories: 'Pick what you do and set a price for each', bio: 'About you', save: 'Save profile', profile: 'Giver profile', rating: 'Rating', completed: 'completed', verified: 'Verified', browseTitle: 'Open requests', makeOffer: 'Send offer', offerMessage: 'Message', offerPrice: 'Your price (MKD)', myOffers: 'My offers' },
   booking: { title: 'My bookings', detail: 'Booking', status: 'Status', accept: 'Accept', decline: 'Decline', cancel: 'Cancel', complete: 'Mark complete', rate: 'Leave a review', contact: 'Contact', contactHidden: 'Phone number appears here once the booking is confirmed.', asRequester: 'As requester', asGiver: 'As giver' },
   rate: { title: 'Rate your experience', stars: 'Stars', text: 'Comment (optional)', submit: 'Submit review', blind: 'Reviews are hidden until you both submit, or 7 days pass.', done: 'Thanks — your review is in.' },
-  post: {
+  post: { editTitle: 'Edit your request', saveChanges: 'Save changes', categoryLocked: 'The category can’t be changed after posting.', notEditable: 'This request is already booked or closed, so it can’t be edited.',
     title: 'Post a favor', step: '1 of 1 · No in-app payment',
     sub: "Describe what you need and what you'll pay. We'll show nearby Givers at a similar price straight away.",
     category: '1 · Category', price: '2 · Your price', priceHint: 'We match Givers within ±25% of this.', matchRange: 'Match range:',
@@ -67,6 +67,22 @@ export const en = {
     language: 'Language', languageHint: 'Used for the app and for messages we send you.',
     save: 'Save changes', saved: 'Saved.', needName: 'Enter your name.', needNeighbourhood: 'Enter your neighbourhood.',
   },
-  notifications: { title: 'Alerts', todo: 'Notifications are not built yet (planned: backend notifications table + live updates).' },
+  notifications: {
+    title: 'Alerts', empty: 'Nothing yet. You’ll see booking requests, offers and replies here as they happen.',
+    markAllRead: 'Mark all as read', unread: (n: number) => (n === 1 ? '1 unread' : `${n} unread`),
+    someone: 'Someone', aFavor: 'your request',
+    text: {
+      BOOKING_REQUESTED: (who: string, what: string) => `${who} wants to book you for “${what}”.`,
+      BOOKING_ACCEPTED: (who: string, what: string) => `${who} accepted “${what}”. Their phone number is now visible.`,
+      BOOKING_DECLINED: (who: string, what: string) => `${who} declined “${what}”. It’s open for other givers again.`,
+      BOOKING_CANCELLED: (who: string, what: string) => `${who} cancelled the booking for “${what}”.`,
+      BOOKING_COMPLETED: (who: string, what: string) => `${who} marked “${what}” as done. Rate how it went.`,
+      BOOKING_EXPIRED: (who: string, what: string) => `${who} didn’t answer in time, so your request for “${what}” expired. It’s open again.`,
+      OFFER_RECEIVED: (who: string, what: string) => `${who} offered to help with “${what}”.`,
+      OFFER_ACCEPTED: (who: string, what: string) => `${who} accepted your offer for “${what}”. Their phone number is now visible.`,
+      OFFER_REJECTED: (_who: string, what: string) => `Your offer for “${what}” wasn’t chosen this time.`,
+      REVIEW_RECEIVED: (who: string, what: string) => `${who} left you a review for “${what}”.`,
+    },
+  },
 }
 export type Dict = typeof en

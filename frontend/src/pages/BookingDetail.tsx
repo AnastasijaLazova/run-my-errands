@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { bookingsApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
+import { useLiveRefresh } from '../notifications/NotificationsContext'
 import { Async, StatusPill } from '../components/Status'
 import { useAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
@@ -10,6 +11,8 @@ export default function BookingDetail() {
   const { me } = useAuth()
   const { t } = useI18n()
   const booking = useAsync(() => bookingsApi.get(id), [id])
+  // Status changes from the other side (accept, decline, done...) show up without a reload.
+  useLiveRefresh(booking.refresh, (n) => n.bookingId === id)
   const b = booking.data
   const revealed = b && ['CONFIRMED', 'COMPLETED', 'CLOSED'].includes(b.status)
   const contact = useAsync(() => (revealed ? bookingsApi.contact(id) : Promise.resolve(null)), [id, b?.status])

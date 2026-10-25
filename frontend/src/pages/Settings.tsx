@@ -63,7 +63,7 @@ export default function Settings() {
         <div className="post-fields">
           <div>
             <label htmlFor="s-name">{t.auth.name}</label>
-            <input id="s-name" className="soft-input" value={form.displayName} onChange={(e) => set('displayName', e.target.value)} autoComplete="name" required />
+            <input id="s-name" className="soft-input" maxLength={120} value={form.displayName} onChange={(e) => set('displayName', e.target.value)} autoComplete="name" required />
           </div>
           <div>
             <label htmlFor="s-email">{t.auth.email}</label>
@@ -71,7 +71,7 @@ export default function Settings() {
           </div>
           <div>
             <label htmlFor="s-phone">{t.auth.phone}</label>
-            <input id="s-phone" className="soft-input" type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} autoComplete="tel" />
+            <input id="s-phone" className="soft-input" type="tel" maxLength={32} value={form.phone} onChange={(e) => set('phone', e.target.value)} autoComplete="tel" />
             <p className="muted small">{t.auth.phoneHint}</p>
           </div>
           <div>

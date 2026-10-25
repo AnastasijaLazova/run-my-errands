@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { meApi } from '../api/endpoints'
 import type { DashboardRequest } from '../api/types'
 import { useAsync } from '../components/useAsync'
+import { useLiveRefresh } from '../notifications/NotificationsContext'
 import { Async } from '../components/Status'
 import { initials } from '../components/Layout'
 import { useAuth } from '../auth/AuthContext'
@@ -59,7 +60,8 @@ function describe(r: DashboardRequest, t: Dict, lang: string) {
 export default function RequesterDashboard() {
   const { me } = useAuth()
   const { t, lang } = useI18n()
-  const { data, loading, error } = useAsync(() => meApi.requesterDashboard())
+  const { data, loading, error, refresh } = useAsync(() => meApi.requesterDashboard())
+  useLiveRefresh(refresh)
 
   const live = data?.requests.filter((r) => !r.booking && r.favorStatus === 'OPEN').length ?? 0
   const confirmed = data?.requests.filter((r) => r.booking?.status === 'CONFIRMED').length ?? 0

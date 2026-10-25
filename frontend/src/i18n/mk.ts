@@ -2,7 +2,7 @@ import type { Dict } from './en'
 
 export const mk: Dict = {
   appName: 'Run My Errands',
-  nav: { home: 'Почетна', post: 'Објави услуга', bookings: 'Мои договори', giverHome: 'Табла за давател', becomeGiver: 'Стани давател', requester: 'Барател', browse: 'Отворени барања', notifications: 'Известувања', settings: 'Поставки', logout: 'Одјави се', login: 'Најави се' },
+  nav: { home: 'Почетна', post: 'Објави услуга', postShort: 'Објави', browseShort: 'Барања', bookingsShort: 'Договори', profile: 'Профил', bookings: 'Мои договори', giverHome: 'Табла за давател', becomeGiver: 'Стани давател', requester: 'Барател', browse: 'Отворени барања', notifications: 'Известувања', settings: 'Поставки', logout: 'Одјави се', login: 'Најави се' },
   auth: { loginTitle: 'Добредојдовте назад', registerTitle: 'Создадете профил', email: 'Е-пошта', password: 'Лозинка', name: 'Име и презиме', neighbourhood: 'Населба', neighbourhoodPlaceholder: 'пр. Дебар Маало', neighbourhoodHint: 'Точната адреса се споделува дури откако договорот е потврден.', phone: 'Телефон (опционално)', phoneHint: 'Бројот се споделува дури откако договорот е потврден.', signIn: 'Најава', createAccount: 'Нов профил', continue: 'Продолжи', terms: 'Со продолжување ги прифаќате правилата на заедницата.', heroTitle: 'Некој две улици подалеку веќе ја врши таа задача.', heroSub: 'Објавете ја услугата со ваша цена, видете ги давателите и нивните населби, и закажете. Парите ги договарате меѓусебно.', login: 'Најави се', register: 'Регистрирај се', noAccount: 'Немате профил?', haveAccount: 'Веќе имате профил?' , roleLabel: 'Сакам да…', roles: {
     REQUESTER: { title: 'Барам помош', hint: 'Објавувам услуги и ангажирам даватели.' },
     GIVER: { title: 'Помагам на другите', hint: 'Нудам услуги и заработувам.' },
@@ -25,11 +25,11 @@ export const mk: Dict = {
     rateName: (name: string) => `Оцени: ${name}`,
   },
   common: { loading: 'Се вчитува…', empty: 'Засега нема ништо.', save: 'Зачувај', cancel: 'Откажи', back: 'Назад', error: 'Нешто тргна наопаку' },
-  favor: { postTitle: 'Побарај услуга', category: 'Категорија', title: 'Што ви треба?', description: 'Детали', budget: 'Вашата цена (МКД)', when: 'Кога', asap: 'Што побрзо', scheduled: 'Избери датум и час', neighbourhood: 'Населба', submit: 'Најди даватели', mine: 'Мои барања', matches: 'Достапни даватели', noMatches: 'Сè уште нема совпаѓања — пробајте со друга цена или навратете подоцна.', book: 'Побарај договор', offers: 'Добиени понуди', byRating: 'Најдобро оценети', byPrice: 'Најниска цена' },
+  favor: { postTitle: 'Побарај услуга', category: 'Категорија', title: 'Што ви треба?', description: 'Детали', budget: 'Вашата цена (МКД)', when: 'Кога', asap: 'Што побрзо', scheduled: 'Избери датум и час', neighbourhood: 'Населба', submit: 'Најди даватели', mine: 'Мои барања', matches: 'Достапни даватели', noMatches: 'Сè уште нема совпаѓања — пробајте со друга цена или навратете подоцна.', book: 'Побарај договор', offers: 'Добиени понуди', byRating: 'Најдобро оценети', byPrice: 'Најниска цена', edit: 'Измени барање', cancelFavor: 'Откажи барање', cancelConfirm: 'Да се откаже ова барање? Сите понуди што чекаат ќе бидат повлечени.' },
   giver: { dashTitle: 'Давател', onboardingTitle: 'Поставете профил на давател', pickCategories: 'Изберете што работите и поставете цена за секое', bio: 'За вас', save: 'Зачувај профил', profile: 'Профил на давател', rating: 'Оцена', completed: 'завршени', verified: 'Верификуван', browseTitle: 'Отворени барања', makeOffer: 'Испрати понуда', offerMessage: 'Порака', offerPrice: 'Вашата цена (МКД)', myOffers: 'Мои понуди' },
   booking: { title: 'Мои договори', detail: 'Договор', status: 'Статус', accept: 'Прифати', decline: 'Одбиј', cancel: 'Откажи', complete: 'Означи како завршено', rate: 'Остави оценка', contact: 'Контакт', contactHidden: 'Телефонскиот број се појавува овде откако договорот ќе се потврди.', asRequester: 'Како барател', asGiver: 'Како давател' },
   rate: { title: 'Оцени го искуството', stars: 'Ѕвезди', text: 'Коментар (опционално)', submit: 'Испрати оценка', blind: 'Оценките се скриени додека не ги испратите и двајцата, или да поминат 7 дена.', done: 'Фала — оценката е испратена.' },
-  post: {
+  post: { editTitle: 'Измени го барањето', saveChanges: 'Зачувај промени', categoryLocked: 'Категоријата не може да се смени по објавувањето.', notEditable: 'Ова барање е веќе договорено или затворено, па не може да се менува.',
     title: 'Објави услуга', step: '1 од 1 · Без плаќање во апликацијата',
     sub: 'Опишете што ви треба и колку ќе платите. Веднаш ќе ви покажеме даватели во близина со слична цена.',
     category: '1 · Категорија', price: '2 · Вашата цена', priceHint: 'Ги поврзуваме давателите во рамки од ±25% од оваа цена.', matchRange: 'Опсег на совпаѓање:',
@@ -69,5 +69,21 @@ export const mk: Dict = {
     language: 'Јазик', languageHint: 'Се користи за апликацијата и за пораките што ви ги праќаме.',
     save: 'Зачувај промени', saved: 'Зачувано.', needName: 'Внесете го вашето име.', needNeighbourhood: 'Внесете ја вашата населба.',
   },
-  notifications: { title: 'Известувања', todo: 'Известувањата сè уште не се изградени (планирано: табела за известувања во бекенд + ажурирање во живо).' },
+  notifications: {
+    title: 'Известувања', empty: 'Сè уште ништо. Тука ќе ги гледате барањата за договор, понудите и одговорите веднаш штом пристигнат.',
+    markAllRead: 'Означи ги сите како прочитани', unread: (n: number) => (n === 1 ? '1 непрочитано' : `${n} непрочитани`),
+    someone: 'Некој', aFavor: 'вашето барање',
+    text: {
+      BOOKING_REQUESTED: (who: string, what: string) => `${who} сака да ве ангажира за „${what}“.`,
+      BOOKING_ACCEPTED: (who: string, what: string) => `${who} го прифати „${what}“. Телефонскиот број сега е видлив.`,
+      BOOKING_DECLINED: (who: string, what: string) => `${who} го одби „${what}“. Барањето е повторно отворено за други даватели.`,
+      BOOKING_CANCELLED: (who: string, what: string) => `${who} го откажа договорот за „${what}“.`,
+      BOOKING_COMPLETED: (who: string, what: string) => `${who} го означи „${what}“ како завршено. Оценете како помина.`,
+      BOOKING_EXPIRED: (who: string, what: string) => `${who} не одговори навреме, па барањето за „${what}“ истече. Повторно е отворено.`,
+      OFFER_RECEIVED: (who: string, what: string) => `${who} понуди помош за „${what}“.`,
+      OFFER_ACCEPTED: (who: string, what: string) => `${who} ја прифати вашата понуда за „${what}“. Телефонскиот број сега е видлив.`,
+      OFFER_REJECTED: (_who: string, what: string) => `Вашата понуда за „${what}“ овој пат не беше избрана.`,
+      REVIEW_RECEIVED: (who: string, what: string) => `${who} ви остави оценка за „${what}“.`,
+    },
+  },
 }

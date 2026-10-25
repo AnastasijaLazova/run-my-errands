@@ -112,7 +112,7 @@ export default function GiverOnboarding() {
         <section className="card post-card">
           <h2>{t.onboard.aboutTitle}</h2>
           <p className="muted small">{t.onboard.aboutHint}</p>
-          <textarea className="soft-input" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} aria-label={t.onboard.aboutTitle} />
+          <textarea className="soft-input" rows={3} maxLength={2000} value={bio} onChange={(e) => setBio(e.target.value)} aria-label={t.onboard.aboutTitle} />
         </section>
       </div>
 

@@ -11,6 +11,7 @@ import java.util.List;
 public interface OfferRepository extends JpaRepository<Offer, Long> {
     List<Offer> findByFavorId(Long favorId);
     List<Offer> findByGiverIdOrderByCreatedAtDesc(Long giverId);
+    long countByFavorIdAndStatus(Long favorId, Offer.Status status);
 
     /** Used when a favor is booked directly or cancelled: nobody can take up the remaining offers any more. */
     @Modifying(flushAutomatically = true, clearAutomatically = true)

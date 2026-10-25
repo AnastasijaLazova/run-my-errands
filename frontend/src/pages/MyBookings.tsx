@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { bookingsApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
+import { useLiveRefresh } from '../notifications/NotificationsContext'
 import { Async, StatusPill } from '../components/Status'
 import { useI18n } from '../i18n/I18nContext'
 
 export default function MyBookings() {
   const { t } = useI18n()
   const [role, setRole] = useState<'requester' | 'giver'>('requester')
-  const { data, loading, error } = useAsync(() => bookingsApi.list(role), [role])
+  const { data, loading, error, refresh } = useAsync(() => bookingsApi.list(role), [role])
+  useLiveRefresh(refresh, (n) => n.bookingId != null)
 
   return (
     <>

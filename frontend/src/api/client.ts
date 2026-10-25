@@ -22,7 +22,7 @@ const NO_RETRY = ['/auth/login', '/auth/signup', '/auth/refresh']
 // Shared so that several requests failing with 401 at once trigger a single refresh.
 let refreshing: Promise<boolean> | null = null
 
-function refreshTokens(): Promise<boolean> {
+export function refreshTokens(): Promise<boolean> {
   const refreshToken = tokenStore.getRefresh()
   if (!refreshToken) return Promise.resolve(false)
   refreshing ??= fetch('/api/v1/auth/refresh', {
@@ -62,7 +62,12 @@ export async function api<T>(path: string, options: { method?: string; body?: un
 
   if (!res.ok) {
     let message = res.statusText
-    try { message = (await res.json()).message ?? message } catch { /* non-JSON error body */ }
+    try {
+      const body = await res.json()
+      // Validation errors carry per-field messages; the first one says more than "Validation failed".
+      const field = body.fields && Object.values(body.fields as Record<string, string>)[0]
+      message = field ?? body.message ?? message
+    } catch { /* non-JSON error body */ }
     throw new ApiError(res.status, message)
   }
   const text = await res.text()

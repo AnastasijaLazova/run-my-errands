@@ -25,7 +25,7 @@ export default function Rate() {
     <form className="card narrow stack" onSubmit={submit}>
       <h1>{t.rate.title}</h1>
       <div className="btn-row">{[1, 2, 3, 4, 5].map((n) => <button type="button" key={n} className={n <= stars ? 'primary' : ''} onClick={() => setStars(n)}>★</button>)}</div>
-      <div><label>{t.rate.text}</label><textarea rows={3} value={text} onChange={(e) => setText(e.target.value)} /></div>
+      <div><label>{t.rate.text}</label><textarea rows={3} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)} /></div>
       <p className="muted">{t.rate.blind}</p>
       {error && <p className="error">{error}</p>}
       <button className="primary" type="submit">{t.rate.submit}</button>

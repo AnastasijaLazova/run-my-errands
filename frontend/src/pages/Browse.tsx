@@ -37,8 +37,8 @@ export default function Browse() {
             <div className="muted">{lang === 'mk' ? f.categoryNameMk : f.categoryNameEn} · {neighbourhoodLabel(f.neighbourhood, lang)}</div>
             {offeringOn === f.id ? (
               <div className="stack">
-                <input placeholder={t.giver.offerMessage} value={offer.message} onChange={(e) => setOffer({ ...offer, message: e.target.value })} />
-                <input type="number" placeholder={t.giver.offerPrice} value={offer.price} onChange={(e) => setOffer({ ...offer, price: e.target.value })} />
+                <input maxLength={1000} placeholder={t.giver.offerMessage} value={offer.message} onChange={(e) => setOffer({ ...offer, message: e.target.value })} />
+                <input type="number" min={0} placeholder={t.giver.offerPrice} value={offer.price} onChange={(e) => setOffer({ ...offer, price: e.target.value })} />
                 <div className="btn-row"><button className="primary" onClick={() => send(f.id)}>{t.giver.makeOffer}</button><button onClick={() => setOfferingOn(null)}>{t.common.cancel}</button></div>
               </div>
             ) : <button className="primary" onClick={() => setOfferingOn(f.id)}>{t.giver.makeOffer}</button>}

@@ -4,6 +4,7 @@ import com.runmyerrands.booking.dto.BookingDto;
 import com.runmyerrands.offer.dto.CreateOfferRequest;
 import com.runmyerrands.offer.dto.OfferDto;
 import com.runmyerrands.user.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class OfferController {
 
     @PostMapping("/api/v1/favors/{favorId}/offers")
     public OfferDto create(@AuthenticationPrincipal User giver, @PathVariable Long favorId,
-                           @RequestBody CreateOfferRequest request) {
+                           @Valid @RequestBody CreateOfferRequest request) {
         return offerService.create(giver, favorId, request);
     }
 

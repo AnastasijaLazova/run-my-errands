@@ -1,6 +1,7 @@
 package com.runmyerrands.user;
 
 import com.runmyerrands.user.dto.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public MeDto updateMe(@AuthenticationPrincipal User user, @RequestBody UpdateMeRequest request) {
+    public MeDto updateMe(@AuthenticationPrincipal User user, @Valid @RequestBody UpdateMeRequest request) {
         return userService.updateMe(user, request);
     }
 
@@ -29,7 +30,7 @@ public class UserController {
 
     @PutMapping("/me/giver-profile")
     public GiverProfileDto upsertGiverProfile(@AuthenticationPrincipal User user,
-                                              @RequestBody UpsertGiverProfileRequest request) {
+                                              @Valid @RequestBody UpsertGiverProfileRequest request) {
         return userService.upsertGiverProfile(user, request);
     }
 }

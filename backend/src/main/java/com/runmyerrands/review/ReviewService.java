@@ -8,6 +8,8 @@ import com.runmyerrands.user.GiverProfileRepository;
 import com.runmyerrands.user.User;
 import com.runmyerrands.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ public class ReviewService {
     private final BookingService bookingService;
     private final GiverProfileRepository giverProfileRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     public ReviewDto submit(Long bookingId, User author, SubmitReviewRequest request) {
@@ -50,7 +53,12 @@ public class ReviewService {
         review.setTargetId(targetId);
         review.setStars(request.stars());
         review.setText(request.text());
-        review = reviewRepository.save(review);
+        try {
+            review = reviewRepository.saveAndFlush(review);
+        } catch (DataIntegrityViolationException e) {
+            // unique (booking_id, author_id): a second submit raced past the check above
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You already reviewed this booking");
+        }
 
         Optional<Review> theirs = reviewRepository.findByBookingIdAndAuthorId(bookingId, targetId);
         if (theirs.isPresent()) {
@@ -81,6 +89,7 @@ public class ReviewService {
         if (review.getPublishedAt() != null) return;
         review.setPublishedAt(Instant.now());
         reviewRepository.save(review);
+        events.publishEvent(new ReviewPublished(review.getId()));
 
         boolean targetIsGiver = bookingRepository.findById(review.getBookingId())
                 .map(b -> b.getGiverId().equals(review.getTargetId())).orElse(false);

@@ -2,19 +2,23 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { bookingsApi, favorsApi, offersApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
+import { useLiveRefresh } from '../notifications/NotificationsContext'
 import { Async } from '../components/Status'
 import { useI18n } from '../i18n/I18nContext'
+import { useAuth } from '../auth/AuthContext'
 import { neighbourhoodLabel } from '../neighbourhoods'
 
 export default function Matches() {
   const id = Number(useParams().id)
   const { t, lang } = useI18n()
+  const { me } = useAuth()
   const navigate = useNavigate()
   const [sort, setSort] = useState('rating')
   const [error, setError] = useState<string | null>(null)
   const favor = useAsync(() => favorsApi.get(id), [id])
   const matches = useAsync(() => favorsApi.matches(id, sort), [id, sort])
   const offers = useAsync(() => favorsApi.offers(id), [id])
+  useLiveRefresh(() => { offers.refresh(); favor.refresh() }, (n) => n.favorId === id)
 
   const book = async (giverId: number) => {
     setError(null)
@@ -22,10 +26,25 @@ export default function Matches() {
     catch (e) { setError((e as Error).message) }
   }
 
+  const cancelFavor = async () => {
+    if (!window.confirm(t.favor.cancelConfirm)) return
+    setError(null)
+    try { await favorsApi.cancel(id); navigate('/') }
+    catch (e) { setError((e as Error).message) }
+  }
+  // Edit/cancel only while nobody has been booked yet (the backend enforces the same rule).
+  const canChange = favor.data?.status === 'OPEN' && favor.data.requesterId === me?.id
+
   return (
     <>
       <h1>{favor.data?.title ?? t.favor.matches}</h1>
       <p className="sub">{t.favor.matches}</p>
+      {canChange && (
+        <div className="btn-row" style={{ marginBottom: 12 }}>
+          <Link to={`/favors/${id}/edit`} className="button">{t.favor.edit}</Link>
+          <button className="danger" onClick={cancelFavor}>{t.favor.cancelFavor}</button>
+        </div>
+      )}
       <div className="btn-row" style={{ marginBottom: 12 }}>
         {[['rating', t.favor.byRating], ['price', t.favor.byPrice]].map(([k, label]) => (
           <button key={k} className={sort === k ? 'primary' : ''} onClick={() => setSort(k)}>{label}</button>
