@@ -1,7 +1,7 @@
 export const en = {
   appName: 'Run My Errands',
-  nav: { home: 'Home', post: 'Post a favor', bookings: 'My bookings', giverHome: 'Giver dashboard', becomeGiver: 'Become a Giver', requester: 'Requester', browse: 'Open requests', notifications: 'Alerts', logout: 'Log out', login: 'Log in' },
-  auth: { loginTitle: 'Welcome back', registerTitle: 'Create your account', email: 'Email', password: 'Password', name: 'Full name', neighbourhood: 'Neighbourhood', neighbourhoodPlaceholder: 'e.g. Дебар Маало', neighbourhoodHint: 'Exact address is only shared after a booking is confirmed.', phone: 'Phone (optional)', phoneHint: 'Your number is only shared after a booking is confirmed.', signIn: 'Sign in', createAccount: 'Create account', continue: 'Continue', terms: 'By continuing you accept the community rules.', heroTitle: 'Someone two streets away is already doing that errand.', heroSub: 'Post the favor with your price, see Givers and their neighbourhoods, book one. You settle the money between yourselves.', login: 'Log in', register: 'Sign up', noAccount: 'No account yet?', haveAccount: 'Already have an account?' , roleLabel: 'I want to…', roles: {
+  nav: { home: 'Home', post: 'Post a favor', bookings: 'My bookings', giverHome: 'Giver dashboard', becomeGiver: 'Become a Giver', requester: 'Requester', browse: 'Open requests', notifications: 'Alerts', settings: 'Settings', logout: 'Log out', login: 'Log in' },
+  auth: { loginTitle: 'Welcome back', registerTitle: 'Create your account', email: 'Email', password: 'Password', name: 'Full name', neighbourhood: 'Neighbourhood', neighbourhoodPlaceholder: 'e.g. Debar Maalo', neighbourhoodHint: 'Exact address is only shared after a booking is confirmed.', phone: 'Phone (optional)', phoneHint: 'Your number is only shared after a booking is confirmed.', signIn: 'Sign in', createAccount: 'Create account', continue: 'Continue', terms: 'By continuing you accept the community rules.', heroTitle: 'Someone two streets away is already doing that errand.', heroSub: 'Post the favor with your price, see Givers and their neighbourhoods, book one. You settle the money between yourselves.', login: 'Log in', register: 'Sign up', noAccount: 'No account yet?', haveAccount: 'Already have an account?' , roleLabel: 'I want to…', roles: {
     REQUESTER: { title: 'Get help', hint: 'Post favors and book Givers.' },
     GIVER: { title: 'Help others', hint: 'Offer your services and earn.' },
     BOTH: { title: 'Both', hint: 'Post favors and help others.' },
@@ -60,6 +60,12 @@ export const en = {
     whereTitle: 'Where you are', whereHint: 'Shown as a neighbourhood, never an exact address.',
     aboutTitle: 'About you', aboutHint: 'A sentence or two Requesters see on your profile.',
     save: 'Save profile', needCategory: 'Add at least one category with a price.',
+  },
+  settings: {
+    title: 'Settings', sub: 'Your name, contact and area — this is what Givers and Requesters see.',
+    profile: 'Profile', profileHint: 'Your email is used to sign in and cannot be changed here.',
+    language: 'Language', languageHint: 'Used for the app and for messages we send you.',
+    save: 'Save changes', saved: 'Saved.', needName: 'Enter your name.', needNeighbourhood: 'Enter your neighbourhood.',
   },
   notifications: { title: 'Alerts', todo: 'Notifications are not built yet (planned: backend notifications table + live updates).' },
 }

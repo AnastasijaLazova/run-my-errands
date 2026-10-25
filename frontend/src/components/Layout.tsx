@@ -8,7 +8,7 @@ export function initials(name: string) {
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?'
 }
 
-/** Name chip in the header; click opens a small menu with the giver dashboard (or giver setup) and log out. */
+/** Name chip in the header; click opens a small menu with the giver dashboard (or giver setup), settings and log out. */
 function UserMenu() {
   const { me, logout } = useAuth()
   const { t } = useI18n()
@@ -37,6 +37,7 @@ function UserMenu() {
           {me.giver
             ? <Link to="/giver">{t.nav.giverHome}</Link>
             : <Link to="/giver/onboarding">{t.nav.becomeGiver}</Link>}
+          <Link to="/settings">{t.nav.settings}</Link>
           <button onClick={() => { logout(); navigate('/login') }}>{t.nav.logout}</button>
         </div>
       )}

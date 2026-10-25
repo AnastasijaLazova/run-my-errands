@@ -2,6 +2,7 @@ package com.runmyerrands.review;
 
 import com.runmyerrands.booking.Booking;
 import com.runmyerrands.booking.BookingRepository;
+import com.runmyerrands.booking.BookingService;
 import com.runmyerrands.review.dto.*;
 import com.runmyerrands.user.GiverProfileRepository;
 import com.runmyerrands.user.User;
@@ -27,6 +28,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final BookingRepository bookingRepository;
+    private final BookingService bookingService;
     private final GiverProfileRepository giverProfileRepository;
     private final UserRepository userRepository;
 
@@ -54,6 +56,7 @@ public class ReviewService {
         if (theirs.isPresent()) {
             publish(review);
             publish(theirs.get());
+            bookingService.closeIfCompleted(bookingId); // both sides have had their say
         }
         return ReviewDto.from(review);
     }

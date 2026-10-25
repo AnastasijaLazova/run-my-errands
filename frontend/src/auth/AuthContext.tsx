@@ -27,15 +27,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const res = await authApi.login({ email, password })
-    tokenStore.set(res.accessToken)
+    tokenStore.set(res)
     await refreshMe()
   }
   const register = async (b: SignupInput) => {
     const res = await authApi.signup(b)
-    tokenStore.set(res.accessToken)
+    tokenStore.set(res)
     await refreshMe()
   }
-  const logout = () => { tokenStore.clear(); setMe(null) }
+  const logout = () => {
+    // Revoke server-side too; local sign-out shouldn't wait on (or fail with) the network.
+    authApi.logout().catch(() => {}).finally(() => tokenStore.clear())
+    setMe(null)
+  }
 
   return <Ctx.Provider value={{ me, loading, login, register, logout, refreshMe }}>{children}</Ctx.Provider>
 }

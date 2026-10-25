@@ -3,6 +3,8 @@ package com.runmyerrands.booking;
 import com.runmyerrands.booking.dto.*;
 import com.runmyerrands.favor.Favor;
 import com.runmyerrands.favor.FavorRepository;
+import com.runmyerrands.offer.Offer;
+import com.runmyerrands.offer.OfferRepository;
 import com.runmyerrands.user.GiverCategoryRepository;
 import com.runmyerrands.user.User;
 import com.runmyerrands.user.UserRepository;
@@ -28,6 +30,7 @@ public class BookingService {
     private final FavorRepository favorRepository;
     private final UserRepository userRepository;
     private final GiverCategoryRepository giverCategoryRepository;
+    private final OfferRepository offerRepository;
 
     /** Path 1: Requester books a Giver directly from Matches. Starts at REQUESTED. */
     @Transactional
@@ -57,6 +60,8 @@ public class BookingService {
 
         favor.setStatus(Favor.Status.BOOKED);
         favorRepository.save(favor);
+        // The requester chose someone directly, so pending offers on this favor can no longer be accepted.
+        offerRepository.updateStatusForFavor(favor.getId(), Offer.Status.PENDING, Offer.Status.EXPIRED);
         return BookingDto.from(booking);
     }
 
@@ -92,14 +97,38 @@ public class BookingService {
         if (event == BookingStateMachine.Event.CANCEL) booking.setCancelReason(cancelReason);
         if (event == BookingStateMachine.Event.COMPLETE) booking.setCompletedAt(Instant.now());
 
-        // A declined/cancelled booking frees the favor up again.
+        // A declined/cancelled booking frees the favor up again; a completed one finishes it.
         if (event == BookingStateMachine.Event.DECLINE || event == BookingStateMachine.Event.CANCEL) {
-            favorRepository.findById(booking.getFavorId()).ifPresent(f -> {
-                f.setStatus(Favor.Status.OPEN);
-                favorRepository.save(f);
-            });
+            setFavorStatus(booking.getFavorId(), Favor.Status.OPEN);
         }
+        if (event == BookingStateMachine.Event.COMPLETE) setFavorStatus(booking.getFavorId(), Favor.Status.CLOSED);
         return BookingDto.from(bookingRepository.save(booking));
+    }
+
+    /** Called by BookingLifecycleJob for a REQUESTED booking the giver never answered. Reopens the favor. */
+    @Transactional
+    public void expire(Long bookingId) {
+        Booking booking = findOrThrow(bookingId);
+        booking.setStatus(BookingStateMachine.transition(booking.getStatus(), BookingStateMachine.Event.EXPIRE));
+        booking.setRespondedAt(Instant.now());
+        bookingRepository.save(booking);
+        setFavorStatus(booking.getFavorId(), Favor.Status.OPEN);
+    }
+
+    /** COMPLETED -> CLOSED once both reviews are in (ReviewService) or the review window ends (BookingLifecycleJob). */
+    @Transactional
+    public void closeIfCompleted(Long bookingId) {
+        Booking booking = findOrThrow(bookingId);
+        if (booking.getStatus() != Booking.Status.COMPLETED) return;
+        booking.setStatus(BookingStateMachine.transition(booking.getStatus(), BookingStateMachine.Event.CLOSE));
+        bookingRepository.save(booking);
+    }
+
+    private void setFavorStatus(Long favorId, Favor.Status status) {
+        favorRepository.findById(favorId).ifPresent(f -> {
+            f.setStatus(status);
+            favorRepository.save(f);
+        });
     }
 
     @Transactional(readOnly = true)

@@ -6,6 +6,7 @@ export const authApi = {
     api<T.AuthResponse>('/auth/signup', { method: 'POST', body: b }),
   login: (b: { email: string; password: string }) =>
     api<T.AuthResponse>('/auth/login', { method: 'POST', body: b }),
+  logout: () => api<void>('/auth/logout', { method: 'POST' }),
 }
 
 export const meApi = {
@@ -29,6 +30,8 @@ export const favorsApi = {
   mine: () => api<T.Favor[]>('/favors/mine'),
   open: (categoryId?: number) => api<T.Favor[]>(`/favors/open${categoryId ? `?categoryId=${categoryId}` : ''}`),
   get: (id: number) => api<T.Favor>(`/favors/${id}`),
+  update: (id: number, b: T.UpdateFavorInput) => api<T.Favor>(`/favors/${id}`, { method: 'PATCH', body: b }),
+  cancel: (id: number) => api<void>(`/favors/${id}`, { method: 'DELETE' }),
   matches: (id: number, sort?: string) => api<T.GiverMatch[]>(`/favors/${id}/matches${sort ? `?sort=${sort}` : ''}`),
   offers: (id: number) => api<T.Offer[]>(`/favors/${id}/offers`),
   makeOffer: (id: number, b: { message?: string; proposedPrice?: number }) =>

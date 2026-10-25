@@ -5,6 +5,7 @@ import { useAsync } from '../components/useAsync'
 import { Async } from '../components/Status'
 import { initials } from '../components/Layout'
 import { useI18n } from '../i18n/I18nContext'
+import { neighbourhoodLabel } from '../neighbourhoods'
 import type { Dict } from '../i18n/en'
 import { categoryColor } from '../categoryColors'
 import { formatDen, formatWhen } from './RequesterDashboard'
@@ -91,7 +92,7 @@ export default function GiverDashboard() {
                         <span className="tile" style={{ background: categoryColor(r.categoryKey) }}>{initials(r.requesterName ?? '')}</span>
                         <div className="request-text">
                           <strong className="incoming-name">{r.requesterName}</strong>
-                          <span className="muted">{[category, r.neighbourhood, when(r.whenType, r.whenAt)].filter(Boolean).join(' · ')}</span>
+                          <span className="muted">{[category, neighbourhoodLabel(r.neighbourhood, lang), when(r.whenType, r.whenAt)].filter(Boolean).join(' · ')}</span>
                         </div>
                         <div className="incoming-price">
                           {r.price != null && <strong>{formatDen(r.price)} {t.dash.den}</strong>}

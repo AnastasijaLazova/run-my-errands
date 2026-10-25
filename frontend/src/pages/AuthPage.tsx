@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
-import { SKOPJE_NEIGHBOURHOODS } from '../neighbourhoods'
+import { NeighbourhoodInput } from '../components/NeighbourhoodInput'
 import type { SignupRole } from '../api/types'
 
 const ROLES: SignupRole[] = ['REQUESTER', 'GIVER', 'BOTH']
@@ -81,8 +81,8 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             <>
               <div>
                 <label>{t.auth.neighbourhood}</label>
-                <input list="neighbourhoods" value={form.neighbourhood} onChange={set('neighbourhood')} placeholder={t.auth.neighbourhoodPlaceholder} required />
-                <datalist id="neighbourhoods">{SKOPJE_NEIGHBOURHOODS.map((n) => <option key={n} value={n} />)}</datalist>
+                <NeighbourhoodInput value={form.neighbourhood} onChange={(v) => setForm((f) => ({ ...f, neighbourhood: v }))}
+                  placeholder={t.auth.neighbourhoodPlaceholder} ariaLabel={t.auth.neighbourhood} required />
                 <p className="auth-hint">{t.auth.neighbourhoodHint}</p>
               </div>
               <div>

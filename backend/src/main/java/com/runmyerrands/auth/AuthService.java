@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -44,8 +45,24 @@ public class AuthService {
         return issueTokens(user);
     }
 
+    /** Trades a valid refresh token for a fresh access + refresh pair. */
+    public AuthResponse refresh(RefreshRequest request) {
+        User user = jwtService.parse(request.refreshToken(), JwtService.TokenType.REFRESH)
+                .flatMap(claims -> userRepository.findByEmail(claims.getSubject())
+                        .filter(u -> jwtService.matchesVersion(claims, u)))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Session expired, please log in again"));
+        return issueTokens(user);
+    }
+
+    /** Stateless JWTs can't be deleted, so bump the version: every token issued so far (all devices) stops working. */
+    @Transactional
+    public void logout(User user) {
+        user.setTokenVersion(user.getTokenVersion() + 1);
+        userRepository.save(user);
+    }
+
     private AuthResponse issueTokens(User user) {
-        return new AuthResponse(jwtService.generateAccessToken(user.getEmail()),
-                jwtService.generateRefreshToken(user.getEmail()), user.getId(), user.getDisplayName());
+        return new AuthResponse(jwtService.generateAccessToken(user),
+                jwtService.generateRefreshToken(user), user.getId(), user.getDisplayName());
     }
 }

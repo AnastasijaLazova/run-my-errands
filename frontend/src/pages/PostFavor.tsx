@@ -5,7 +5,7 @@ import { useAsync } from '../components/useAsync'
 import { useI18n } from '../i18n/I18nContext'
 import type { Dict } from '../i18n/en'
 import { useAuth } from '../auth/AuthContext'
-import { SKOPJE_NEIGHBOURHOODS } from '../neighbourhoods'
+import { NeighbourhoodInput } from '../components/NeighbourhoodInput'
 import { categoryColor } from '../categoryColors'
 import { formatDen } from './RequesterDashboard'
 
@@ -149,8 +149,7 @@ export default function PostFavor() {
           </div>
           <div>
             <label htmlFor="pf-hood">{t.post.neighbourhood}</label>
-            <input id="pf-hood" list="neighbourhoods" value={neighbourhood} onChange={(e) => setNeighbourhood(e.target.value)} required />
-            <datalist id="neighbourhoods">{SKOPJE_NEIGHBOURHOODS.map((n) => <option key={n} value={n} />)}</datalist>
+            <NeighbourhoodInput id="pf-hood" value={neighbourhood} onChange={setNeighbourhood} required />
           </div>
         </div>
         <textarea

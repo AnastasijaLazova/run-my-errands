@@ -3,6 +3,7 @@ import { giversApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
 import { Async } from '../components/Status'
 import { useI18n } from '../i18n/I18nContext'
+import { neighbourhoodLabel } from '../neighbourhoods'
 
 export default function GiverProfilePage() {
   const id = Number(useParams().id)
@@ -14,7 +15,7 @@ export default function GiverProfilePage() {
       {data && (
         <>
           <h1>{data.displayName} {data.verified && <span className="pill">{t.giver.verified}</span>}</h1>
-          <p className="sub">{data.neighbourhood && <>{data.neighbourhood} · </>}★ {data.ratingAvg.toFixed(1)} ({data.ratingCount}) · {data.completedCount} {t.giver.completed}</p>
+          <p className="sub">{data.neighbourhood && <>{neighbourhoodLabel(data.neighbourhood, lang)} · </>}★ {data.ratingAvg.toFixed(1)} ({data.ratingCount}) · {data.completedCount} {t.giver.completed}</p>
           {data.bio && <div className="card">{data.bio}</div>}
           {data.categories.map((c) => (
             <div className="card row" key={c.categoryId}>

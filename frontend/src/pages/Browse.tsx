@@ -3,6 +3,7 @@ import { categoriesApi, favorsApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
 import { Async } from '../components/Status'
 import { useI18n } from '../i18n/I18nContext'
+import { neighbourhoodLabel } from '../neighbourhoods'
 
 export default function Browse() {
   const { t, lang } = useI18n()
@@ -33,7 +34,7 @@ export default function Browse() {
         {favors.data?.map((f) => (
           <div className="card stack" key={f.id}>
             <div className="row"><strong>{f.title}</strong><span className="price">{f.budget ? `${f.budget} MKD` : ''}</span></div>
-            <div className="muted">{lang === 'mk' ? f.categoryNameMk : f.categoryNameEn} · {f.neighbourhood}</div>
+            <div className="muted">{lang === 'mk' ? f.categoryNameMk : f.categoryNameEn} · {neighbourhoodLabel(f.neighbourhood, lang)}</div>
             {offeringOn === f.id ? (
               <div className="stack">
                 <input placeholder={t.giver.offerMessage} value={offer.message} onChange={(e) => setOffer({ ...offer, message: e.target.value })} />

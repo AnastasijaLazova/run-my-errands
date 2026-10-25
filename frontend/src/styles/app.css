@@ -4,7 +4,7 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 .header { background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
-.header-inner { max-width: 1260px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
+.header-inner { padding: 12px clamp(20px, 4vw, 64px); display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; color: var(--ink); }
 .brand:hover { text-decoration: none; }
 .brand-logo { width: 34px; height: 34px; border-radius: 8px; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 15px; }
@@ -23,7 +23,7 @@ a:hover { text-decoration: underline; }
 .menu a:hover, .menu button:hover { background: var(--paper); text-decoration: none; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: #3A4651; color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .avatar.dark { width: 40px; height: 40px; font-size: 14px; }
-.container { max-width: 1260px; margin: 0 auto; padding: 36px 20px 60px; }
+.container { padding: 36px clamp(20px, 4vw, 64px) 60px; }
 
 h1 { font-size: 26px; margin: 0 0 4px; }
 h2 { font-size: 18px; margin: 24px 0 10px; }
@@ -226,7 +226,21 @@ button.lg { padding: 12px 26px; font-size: 16px; }
 .add-label { font-size: 13px; font-weight: 600; color: var(--muted); margin: 18px 0 0; }
 .chip.add { border-style: dashed; background: var(--paper); }
 .soft-input { background: var(--paper); }
+
+/* Settings */
+.settings { width: 100%; max-width: 720px; margin: 0 auto; }
+.settings .lang-slots { max-width: 320px; }
+.saved { color: var(--accent); margin: 8px 0; font-weight: 600; }
 @media (max-width: 600px) {
   .cat-row { flex-wrap: wrap; }
   .cat-name { flex-basis: calc(100% - 48px); }
 }
+
+/* Neighbourhood combobox — dropdown spans the full width of its field */
+.combo { position: relative; }
+.combo input { padding-right: 36px; }
+.combo-toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); border: 0; background: none; padding: 4px 8px; color: var(--muted); font-size: 14px; line-height: 1; }
+.combo-list { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20; max-height: 240px; overflow-y: auto; margin: 0; padding: 6px; list-style: none; background: var(--card); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+.combo-list li { padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+.combo-list li.active { background: var(--accent-soft); }
+.combo-list li.selected { font-weight: 600; color: var(--accent); }

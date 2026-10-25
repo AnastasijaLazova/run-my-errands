@@ -1,6 +1,5 @@
 package com.runmyerrands.config;
 
-import com.runmyerrands.user.User;
 import com.runmyerrands.user.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,20 +30,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try {
-                String token = header.substring(7);
-                if (!jwtService.isExpired(token)) {
-                    User user = userRepository.findByEmail(jwtService.extractEmail(token)).orElse(null);
-                    if (user != null) {
+            jwtService.parse(header.substring(7), JwtService.TokenType.ACCESS)
+                    .flatMap(claims -> userRepository.findByEmail(claims.getSubject())
+                            .filter(user -> jwtService.matchesVersion(claims, user)))
+                    .ifPresent(user -> {
                         var auth = new UsernamePasswordAuthenticationToken(
                                 user, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
                         auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(auth);
-                    }
-                }
-            } catch (Exception ignored) {
-                // bad/garbled token -> continue unauthenticated; protected routes will return 401/403
-            }
+                    });
+            // bad/expired/revoked token -> continue unauthenticated; protected routes will return 401/403
         }
         chain.doFilter(request, response);
     }

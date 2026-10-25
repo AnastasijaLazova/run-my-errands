@@ -24,6 +24,9 @@ export interface CreateFavorInput {
   whenType?: 'ASAP' | 'SCHEDULED'; whenAt?: string; budget?: number
 }
 
+/** The category can't change after posting. */
+export type UpdateFavorInput = Partial<Omit<CreateFavorInput, 'categoryId'>>
+
 export interface GiverMatch {
   userId: number; displayName: string; avatarUrl: string | null; neighbourhood: string
   price: number; ratingAvg: number; ratingCount: number; verified: boolean

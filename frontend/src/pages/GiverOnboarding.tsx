@@ -5,7 +5,7 @@ import type { Category } from '../api/types'
 import { useAsync } from '../components/useAsync'
 import { useAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
-import { SKOPJE_NEIGHBOURHOODS } from '../neighbourhoods'
+import { NeighbourhoodInput } from '../components/NeighbourhoodInput'
 import { categoryColor } from '../categoryColors'
 
 export default function GiverOnboarding() {
@@ -74,7 +74,7 @@ export default function GiverOnboarding() {
                 <span className="trust-pill">{t.onboard.trust[c.trustTier]}</span>
                 <label className="price-input">
                   <input
-                    type="number" min={1} step={10} required value={x.price} onChange={(e) => setPrice(c.id, e.target.value)}
+                    type="number" min={1} step={1} required value={x.price} onChange={(e) => setPrice(c.id, e.target.value)}
                     aria-label={`${name(c)} — ${t.onboard.price}`}
                   />
                   <span>{t.dash.den}</span>
@@ -105,9 +105,8 @@ export default function GiverOnboarding() {
         <section className="card post-card">
           <h2>{t.onboard.whereTitle}</h2>
           <p className="muted small">{t.onboard.whereHint}</p>
-          <input className="soft-input" list="neighbourhoods" value={neighbourhood} onChange={(e) => setNeighbourhood(e.target.value)}
-            placeholder={t.auth.neighbourhoodPlaceholder} aria-label={t.onboard.whereTitle} required />
-          <datalist id="neighbourhoods">{SKOPJE_NEIGHBOURHOODS.map((n) => <option key={n} value={n} />)}</datalist>
+          <NeighbourhoodInput className="soft-input" value={neighbourhood} onChange={setNeighbourhood}
+            placeholder={t.auth.neighbourhoodPlaceholder} ariaLabel={t.onboard.whereTitle} required />
         </section>
 
         <section className="card post-card">

@@ -1,6 +1,8 @@
 package com.runmyerrands.config;
 
+import com.runmyerrands.user.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,11 +11,19 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.function.Function;
+import java.util.Optional;
 
-/** Issues/validates JWTs. Subject is the user's email. */
+/**
+ * Issues/validates JWTs. Subject is the user's email; "typ" keeps access and refresh tokens apart, and
+ * "ver" must match User.tokenVersion, so bumping that (logout) revokes every token issued before.
+ */
 @Service
 public class JwtService {
+
+    public enum TokenType { ACCESS, REFRESH }
+
+    private static final String TYPE_CLAIM = "typ";
+    private static final String VERSION_CLAIM = "ver";
 
     @Value("${app.jwt.secret}")
     private String secret;
@@ -26,20 +36,28 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(String email) { return build(email, accessTokenExpirationMs); }
-    public String generateRefreshToken(String email) { return build(email, refreshTokenExpirationMs); }
+    public String generateAccessToken(User user) { return build(user, TokenType.ACCESS, accessTokenExpirationMs); }
+    public String generateRefreshToken(User user) { return build(user, TokenType.REFRESH, refreshTokenExpirationMs); }
 
-    private String build(String subject, long ttlMs) {
+    private String build(User user, TokenType type, long ttlMs) {
         Date now = new Date();
-        return Jwts.builder().subject(subject).issuedAt(now)
-                .expiration(new Date(now.getTime() + ttlMs)).signWith(key()).compact();
+        return Jwts.builder().subject(user.getEmail())
+                .claim(TYPE_CLAIM, type.name()).claim(VERSION_CLAIM, user.getTokenVersion())
+                .issuedAt(now).expiration(new Date(now.getTime() + ttlMs)).signWith(key()).compact();
     }
 
-    public String extractEmail(String token) { return claim(token, Claims::getSubject); }
-    public boolean isExpired(String token) { return claim(token, Claims::getExpiration).before(new Date()); }
+    /** Signature, expiry and type checked; empty for anything else. The caller still checks the version. */
+    public Optional<Claims> parse(String token, TokenType expectedType) {
+        try {
+            Claims claims = Jwts.parser().verifyWith(key()).build().parseSignedClaims(token).getPayload();
+            return expectedType.name().equals(claims.get(TYPE_CLAIM, String.class)) ? Optional.of(claims) : Optional.empty();
+        } catch (JwtException | IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
 
-    private <T> T claim(String token, Function<Claims, T> resolver) {
-        Claims claims = Jwts.parser().verifyWith(key()).build().parseSignedClaims(token).getPayload();
-        return resolver.apply(claims);
+    public boolean matchesVersion(Claims claims, User user) {
+        Integer ver = claims.get(VERSION_CLAIM, Integer.class);
+        return ver != null && ver.equals(user.getTokenVersion());
     }
 }

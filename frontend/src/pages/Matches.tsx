@@ -4,10 +4,11 @@ import { bookingsApi, favorsApi, offersApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
 import { Async } from '../components/Status'
 import { useI18n } from '../i18n/I18nContext'
+import { neighbourhoodLabel } from '../neighbourhoods'
 
 export default function Matches() {
   const id = Number(useParams().id)
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const navigate = useNavigate()
   const [sort, setSort] = useState('rating')
   const [error, setError] = useState<string | null>(null)
@@ -40,7 +41,7 @@ export default function Matches() {
                 <Link to={`/givers/${m.userId}`}><strong>{m.displayName || `#${m.userId}`}</strong></Link>
                 <span className="price">{m.price} MKD</span>
               </div>
-              <div className="muted">{m.neighbourhood || '—'} · ★ {m.ratingAvg.toFixed(1)} ({m.ratingCount}){m.verified ? ` · ${t.giver.verified}` : ''}</div>
+              <div className="muted">{neighbourhoodLabel(m.neighbourhood, lang) || '—'} · ★ {m.ratingAvg.toFixed(1)} ({m.ratingCount}){m.verified ? ` · ${t.giver.verified}` : ''}</div>
               <button className="primary" onClick={() => book(m.userId)}>{t.favor.book}</button>
             </div>
           ))}

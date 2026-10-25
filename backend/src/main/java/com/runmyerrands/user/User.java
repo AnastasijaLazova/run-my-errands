@@ -50,6 +50,10 @@ public class User {
     @Column(name = "requester_rating_count", nullable = false)
     private Integer requesterRatingCount = 0;
 
+    /** Embedded in every JWT; incremented on logout to revoke all outstanding tokens. */
+    @Column(name = "token_version", nullable = false)
+    private Integer tokenVersion = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 }

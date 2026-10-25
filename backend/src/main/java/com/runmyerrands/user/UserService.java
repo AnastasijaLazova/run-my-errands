@@ -20,8 +20,9 @@ public class UserService {
 
     @Transactional
     public MeDto updateMe(User user, UpdateMeRequest request) {
-        if (request.displayName() != null) user.setDisplayName(request.displayName());
-        if (request.phone() != null) user.setPhone(request.phone());
+        if (request.displayName() != null && !request.displayName().isBlank()) user.setDisplayName(request.displayName().trim());
+        // Blank phone clears it; null leaves it unchanged.
+        if (request.phone() != null) user.setPhone(request.phone().isBlank() ? null : request.phone().trim());
         if (request.neighbourhood() != null && !request.neighbourhood().isBlank()) user.setNeighbourhood(request.neighbourhood().trim());
         if (request.avatarUrl() != null) user.setAvatarUrl(request.avatarUrl());
         if (request.locale() != null) user.setLocale(request.locale());

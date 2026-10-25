@@ -33,8 +33,12 @@ Two separate projects in one repo:
 (±25% price, 15 km), browse open favors, offers (send / accept / reject / withdraw), booking state machine,
 contact reveal, blind reviews + rating aggregates, all main screens, EN/MK language switch.
 
-**Not built yet:** `/auth/refresh` + `/auth/logout`, notifications (page is a placeholder), PATCH/DELETE favor,
-radius/lat-lng filtering on *Browse*, booking auto-expiry after 24 h, map view, tests, PostGIS (haversine SQL is used instead),
+**Lifecycle jobs** (`BookingLifecycleJob`): unanswered `REQUESTED` bookings expire after 24 h (favor reopens),
+`PENDING` offers expire after 48 h, `COMPLETED` bookings close after 7 days or as soon as both reviews are in.
+Booking a giver directly expires the favor's pending offers. `/auth/refresh` + `/auth/logout` (logout revokes all of
+the user's tokens via `users.token_version`), `PATCH`/`DELETE /favors/{id}` (open favors only).
+
+**Not built yet:** notifications (page is a placeholder), UI for editing/cancelling a favor, map view, tests,
 rate limiting, Docker deployment.
 
 **Honesty note:** the frontend was compiled (`tsc` + `vite build`) successfully. The backend has **not** been

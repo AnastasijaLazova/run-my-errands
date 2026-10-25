@@ -4,6 +4,7 @@ import com.runmyerrands.favor.dto.*;
 import com.runmyerrands.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,5 +41,16 @@ public class FavorController {
     public List<GiverMatchDto> matches(@PathVariable Long id, @RequestParam(required = false) String sort) {
         return favorService.findMatches(id, sort);
     }
-    // TODO next: PATCH /{id}, DELETE /{id}
+
+    @PatchMapping("/{id}")
+    public FavorDto update(@AuthenticationPrincipal User requester, @PathVariable Long id,
+                           @Valid @RequestBody UpdateFavorRequest request) {
+        return favorService.update(id, requester, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancel(@AuthenticationPrincipal User requester, @PathVariable Long id) {
+        favorService.cancel(id, requester);
+    }
 }

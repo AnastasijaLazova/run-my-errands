@@ -14,6 +14,7 @@ import GiverDashboard from './pages/GiverDashboard'
 import Browse from './pages/Browse'
 import GiverOnboarding from './pages/GiverOnboarding'
 import Notifications from './pages/Notifications'
+import Settings from './pages/Settings'
 
 /** Giver-only accounts have no requester dashboard: send them to the giver side (or its setup). */
 function Home() {
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/giver/onboarding" element={<GiverOnboarding />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
     </Routes>
