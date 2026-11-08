@@ -23,7 +23,7 @@ public class MatchingRepository {
                                           double priceTolerancePct, String sort) {
         StringBuilder sql = new StringBuilder("""
             SELECT u.id AS user_id, u.display_name, u.avatar_url, u.neighbourhood,
-                   gc.price, gp.rating_avg, gp.rating_count, gp.verified
+                   gc.price, gp.rating_avg, gp.rating_count, gp.verified, gp.bio, gp.completed_count
             FROM giver_categories gc
             JOIN giver_profiles gp ON gp.user_id = gc.user_id
             JOIN users u ON u.id = gp.user_id
@@ -43,6 +43,7 @@ public class MatchingRepository {
         return jdbc.query(sql.toString(), (rs, i) -> new GiverMatchDto(
                 rs.getLong("user_id"), rs.getString("display_name"), rs.getString("avatar_url"),
                 rs.getString("neighbourhood"), rs.getBigDecimal("price"), rs.getDouble("rating_avg"),
-                rs.getInt("rating_count"), rs.getBoolean("verified")), params.toArray());
+                rs.getInt("rating_count"), rs.getBoolean("verified"), rs.getString("bio"),
+                rs.getInt("completed_count")), params.toArray());
     }
 }

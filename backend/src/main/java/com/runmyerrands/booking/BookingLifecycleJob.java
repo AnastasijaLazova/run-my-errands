@@ -22,7 +22,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class BookingLifecycleJob {
 
-    static final Duration REQUEST_TTL = Duration.ofHours(24);
+    public static final Duration REQUEST_TTL = Duration.ofHours(24);
     static final Duration OFFER_TTL = Duration.ofHours(48);
     static final Duration REVIEW_WINDOW = Duration.ofDays(7);
 

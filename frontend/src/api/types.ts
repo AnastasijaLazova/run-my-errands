@@ -30,6 +30,7 @@ export type UpdateFavorInput = Partial<Omit<CreateFavorInput, 'categoryId'>>
 export interface GiverMatch {
   userId: number; displayName: string; avatarUrl: string | null; neighbourhood: string
   price: number; ratingAvg: number; ratingCount: number; verified: boolean
+  bio: string | null; completedCount: number
 }
 
 export interface GiverProfile {
@@ -45,6 +46,14 @@ export interface Booking {
   id: number; favorId: number; requesterId: number; giverId: number; origin: 'DIRECT_REQUEST' | 'GIVER_OFFER'
   offerId: number | null; status: BookingStatus; note: string | null; price: number | null; requestedAt: string
   respondedAt: string | null; completedAt: string | null; cancelReason: string | null
+}
+
+export interface BookingListItem {
+  id: number; favorId: number; status: BookingStatus; origin: 'DIRECT_REQUEST' | 'GIVER_OFFER'; price: number | null
+  requestedAt: string; completedAt: string | null; expiresAt: string | null
+  otherUserId: number; otherName: string | null
+  favorTitle: string; categoryKey: string; categoryNameEn: string; categoryNameMk: string
+  whenType: 'ASAP' | 'SCHEDULED'; whenAt: string | null; myStars: number | null
 }
 
 export interface Contact { phone: string | null; displayName: string }
@@ -67,10 +76,10 @@ export interface RequesterDashboard {
 }
 
 export interface GiverDashboard {
-  stats: { completedCount: number; ratingAvg: number; ratingCount: number }
+  stats: { completedCount: number; ratingAvg: number; ratingCount: number; acceptRate: number | null; earnedThisMonth: number }
   requests: {
     bookingId: number; requesterName: string | null; categoryKey: string; categoryNameEn: string; categoryNameMk: string
-    neighbourhood: string; whenType: 'ASAP' | 'SCHEDULED'; whenAt: string | null; price: number | null; note: string | null; requestedAt: string
+    neighbourhood: string; whenType: 'ASAP' | 'SCHEDULED'; whenAt: string | null; price: number | null; note: string | null; requestedAt: string; expiresAt?: string
   }[]
   upcoming: { bookingId: number; requesterName: string | null; favorTitle: string; whenType: 'ASAP' | 'SCHEDULED'; whenAt: string | null; price: number | null }[]
   recentRatings: { authorName: string | null; stars: number; text: string | null; publishedAt: string }[]

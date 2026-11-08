@@ -11,8 +11,8 @@ export function Async({ loading, error, empty, children }:
   return <>{children}</>
 }
 
-export function StatusPill({ status }: { status: string }) {
+export function StatusPill({ status, label }: { status: string; label?: string }) {
   const cls = ['DECLINED', 'CANCELLED', 'EXPIRED'].includes(status) ? 'red'
     : ['CLOSED', 'COMPLETED', 'REJECTED', 'WITHDRAWN'].includes(status) ? 'grey' : ''
-  return <span className={`pill ${cls}`}>{status}</span>
+  return <span className={`pill ${cls}`}>{label ?? status}</span>
 }

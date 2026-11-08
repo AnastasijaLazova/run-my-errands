@@ -10,5 +10,8 @@
   --danger: #B42318;
   --radius: 14px;
   --shadow: 0 1px 2px rgba(20, 24, 26, 0.06), 0 4px 12px rgba(20, 24, 26, 0.04);
+  --map-bg: #FBF4EA;
+  --map-grid: #F0E4D4;
+  --map-ring: #A78BFA;
   --font: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }

@@ -23,7 +23,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> list(@AuthenticationPrincipal User user, @RequestParam(required = false) String role) {
+    public List<BookingListItemDto> list(@AuthenticationPrincipal User user, @RequestParam(required = false) String role) {
         return bookingService.forUser(user.getId(), role);
     }
 

@@ -48,7 +48,7 @@ export const offersApi = {
 export const bookingsApi = {
   create: (b: { favorId: number; giverId: number; note?: string }) =>
     api<T.Booking>('/bookings', { method: 'POST', body: b }),
-  list: (role: 'requester' | 'giver') => api<T.Booking[]>(`/bookings?role=${role}`),
+  list: (role: 'requester' | 'giver') => api<T.BookingListItem[]>(`/bookings?role=${role}`),
   get: (id: number) => api<T.Booking>(`/bookings/${id}`),
   accept: (id: number) => api<T.Booking>(`/bookings/${id}/accept`, { method: 'POST' }),
   decline: (id: number) => api<T.Booking>(`/bookings/${id}/decline`, { method: 'POST' }),

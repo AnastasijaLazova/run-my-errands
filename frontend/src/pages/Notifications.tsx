@@ -4,6 +4,8 @@ import type { AppNotification } from '../api/types'
 import { useAsync } from '../components/useAsync'
 import { Async } from '../components/Status'
 import { useI18n } from '../i18n/I18nContext'
+import type { Dict } from '../i18n/en'
+import { initials, nameColor } from '../components/avatar'
 import { useLiveRefresh, useNotifications } from '../notifications/NotificationsContext'
 
 /** Where tapping a notification takes you. */
@@ -14,6 +16,26 @@ export function notificationTarget(n: AppNotification): string {
     case 'OFFER_REJECTED': return '/browse'
     default: return n.bookingId ? `/bookings/${n.bookingId}` : '/bookings'
   }
+}
+
+/** The one button on each notification, matching where it leads. */
+function actionLabel(t: Dict, n: AppNotification) {
+  switch (n.type) {
+    case 'BOOKING_COMPLETED': return t.notifications.action.rate
+    case 'OFFER_RECEIVED': return t.notifications.action.offers
+    case 'OFFER_REJECTED': return t.notifications.action.browse
+    default: return t.notifications.action.view
+  }
+}
+
+function timeAgo(t: Dict, iso: string) {
+  const minutes = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000))
+  if (minutes < 1) return t.notifications.ago.now
+  if (minutes < 60) return t.notifications.ago.minutes(minutes)
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return t.notifications.ago.hours(hours)
+  const days = Math.floor(hours / 24)
+  return days === 1 ? t.notifications.ago.yesterday : t.notifications.ago.days(days)
 }
 
 export default function Notifications() {
@@ -38,11 +60,11 @@ export default function Notifications() {
   }
 
   return (
-    <>
-      <div className="row notif-head">
+    <div className="notif-page">
+      <div className="notif-head">
         <div>
           <h1>{t.notifications.title}</h1>
-          {unread > 0 && <p className="sub">{t.notifications.unread(unread)}</p>}
+          <p className="sub">{t.notifications.sub}{unread > 0 && <> · <strong>{t.notifications.unread(unread)}</strong></>}</p>
         </div>
         {unread > 0 && <button onClick={markAll}>{t.notifications.markAllRead}</button>}
       </div>
@@ -50,20 +72,24 @@ export default function Notifications() {
         {list.data?.length === 0 && <div className="card muted">{t.notifications.empty}</div>}
         <ul className="notif-list">
           {list.data?.map((n) => (
-            <li key={n.id}>
-              <button className={`card notif${n.read ? '' : ' unread'}`} onClick={() => open(n)}>
-                {!n.read && <span className="notif-dot" aria-hidden="true" />}
+            <li key={n.id} className={`card notif${n.read ? '' : ' unread'}`} onClick={() => open(n)}>
+              <span className="notif-avatar" style={{ background: nameColor(n.actorName) }}>
+                {n.actorName ? initials(n.actorName) : '!'}
+              </span>
+              <span className="notif-body">
                 <span className="notif-text">
                   {t.notifications.text[n.type](n.actorName || t.notifications.someone, n.favorTitle || t.notifications.aFavor)}
                 </span>
-                <time className="muted small" dateTime={n.createdAt}>
-                  {new Date(n.createdAt).toLocaleString(lang, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                <time className="muted small" dateTime={n.createdAt}
+                      title={new Date(n.createdAt).toLocaleString(lang, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}>
+                  {timeAgo(t, n.createdAt)}
                 </time>
-              </button>
+              </span>
+              <button className="notif-action" onClick={(e) => { e.stopPropagation(); open(n) }}>{actionLabel(t, n)}</button>
             </li>
           ))}
         </ul>
       </Async>
-    </>
+    </div>
   )
 }

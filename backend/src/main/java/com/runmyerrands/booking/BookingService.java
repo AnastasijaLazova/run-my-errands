@@ -5,6 +5,7 @@ import com.runmyerrands.favor.Favor;
 import com.runmyerrands.favor.FavorRepository;
 import com.runmyerrands.offer.Offer;
 import com.runmyerrands.offer.OfferRepository;
+import com.runmyerrands.review.ReviewRepository;
 import com.runmyerrands.user.GiverCategoryRepository;
 import com.runmyerrands.user.User;
 import com.runmyerrands.user.UserRepository;
@@ -18,7 +19,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final GiverCategoryRepository giverCategoryRepository;
     private final OfferRepository offerRepository;
+    private final ReviewRepository reviewRepository;
     private final ApplicationEventPublisher events;
 
     /** Path 1: Requester books a Giver directly from Matches. Starts at REQUESTED. */
@@ -144,11 +149,30 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookingDto> forUser(Long userId, String role) {
-        List<Booking> list = "giver".equalsIgnoreCase(role)
+    public List<BookingListItemDto> forUser(Long userId, String role) {
+        boolean asGiver = "giver".equalsIgnoreCase(role);
+        List<Booking> list = asGiver
                 ? bookingRepository.findByGiverIdOrderByRequestedAtDesc(userId)
                 : bookingRepository.findByRequesterIdOrderByRequestedAtDesc(userId);
-        return list.stream().map(BookingDto::from).toList();
+
+        Map<Long, String> names = userRepository.findAllById(list.stream()
+                        .map(b -> asGiver ? b.getRequesterId() : b.getGiverId()).collect(Collectors.toSet())).stream()
+                .collect(Collectors.toMap(User::getId, User::getDisplayName));
+        Map<Long, Favor> favors = favorRepository.findAllById(list.stream().map(Booking::getFavorId).collect(Collectors.toSet()))
+                .stream().collect(Collectors.toMap(Favor::getId, Function.identity()));
+
+        return list.stream().map(b -> {
+            Long otherId = asGiver ? b.getRequesterId() : b.getGiverId();
+            Favor f = favors.get(b.getFavorId());
+            Integer myStars = reviewRepository.findByBookingIdAndAuthorId(b.getId(), userId)
+                    .map(r -> (int) r.getStars()).orElse(null);
+            Instant expiresAt = b.getStatus() == Booking.Status.REQUESTED
+                    ? b.getRequestedAt().plus(BookingLifecycleJob.REQUEST_TTL) : null;
+            return new BookingListItemDto(b.getId(), b.getFavorId(), b.getStatus().name(), b.getOrigin().name(),
+                    b.getPrice() != null ? b.getPrice() : f.getBudget(), b.getRequestedAt(), b.getCompletedAt(), expiresAt,
+                    otherId, names.get(otherId), f.getTitle(), f.getCategory().getKey(),
+                    f.getCategory().getNameEn(), f.getCategory().getNameMk(), f.getWhenType().name(), f.getWhenAt(), myStars);
+        }).toList();
     }
 
     @Transactional(readOnly = true)

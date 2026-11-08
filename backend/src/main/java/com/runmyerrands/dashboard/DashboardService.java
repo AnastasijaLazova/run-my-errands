@@ -1,6 +1,7 @@
 package com.runmyerrands.dashboard;
 
 import com.runmyerrands.booking.Booking;
+import com.runmyerrands.booking.BookingLifecycleJob;
 import com.runmyerrands.booking.BookingRepository;
 import com.runmyerrands.dashboard.dto.GiverDashboardDto;
 import com.runmyerrands.dashboard.dto.RequesterDashboardDto;
@@ -119,7 +120,7 @@ public class DashboardService {
                             f.getNeighbourhood(), f.getWhenType().name(), f.getWhenAt(),
                             b.getPrice() != null ? b.getPrice() : f.getBudget(),
                             b.getNote() != null && !b.getNote().isBlank() ? b.getNote() : f.getDescription(),
-                            b.getRequestedAt());
+                            b.getRequestedAt(), b.getRequestedAt().plus(BookingLifecycleJob.REQUEST_TTL));
                 })
                 .toList();
 
@@ -147,9 +148,26 @@ public class DashboardService {
 
         int completed = (int) bookings.stream().filter(b -> DONE.contains(b.getStatus())).count();
         Optional<GiverProfile> profile = giverProfileRepository.findByUserId(me.getId());
+
+        // Accept rate only looks at direct requests the giver had to answer. Offers are the giver's own
+        // idea, and a cancelled request says nothing about whether they would have said yes.
+        List<Booking> answered = bookings.stream()
+                .filter(b -> b.getOrigin() == Booking.Origin.DIRECT_REQUEST)
+                .filter(b -> b.getStatus() != Booking.Status.REQUESTED && b.getStatus() != Booking.Status.CANCELLED)
+                .toList();
+        long accepted = answered.stream()
+                .filter(b -> b.getStatus() != Booking.Status.DECLINED && b.getStatus() != Booking.Status.EXPIRED).count();
+        Integer acceptRate = answered.isEmpty() ? null : (int) Math.round(100.0 * accepted / answered.size());
+
+        Instant monthStart = LocalDate.now(SKOPJE).withDayOfMonth(1).atStartOfDay(SKOPJE).toInstant();
+        BigDecimal earned = bookings.stream()
+                .filter(b -> DONE.contains(b.getStatus()) && b.getCompletedAt() != null && !b.getCompletedAt().isBefore(monthStart))
+                .map(b -> b.getPrice() != null ? b.getPrice() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         GiverDashboardDto.Stats stats = new GiverDashboardDto.Stats(completed,
                 profile.map(GiverProfile::getRatingAvg).orElse(BigDecimal.ZERO),
-                profile.map(GiverProfile::getRatingCount).orElse(0));
+                profile.map(GiverProfile::getRatingCount).orElse(0), acceptRate, earned);
         return new GiverDashboardDto(stats, requests, upcoming, recentRatings);
     }
 }

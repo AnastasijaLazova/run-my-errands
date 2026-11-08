@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { bookingsApi, favorsApi, meApi, offersApi } from '../api/endpoints'
+import { bookingsApi, favorsApi, giversApi, meApi, offersApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
 import { useLiveRefresh } from '../notifications/NotificationsContext'
 import { Async } from '../components/Status'
 import { initials } from '../components/Layout'
 import { useI18n } from '../i18n/I18nContext'
-import { neighbourhoodLabel } from '../neighbourhoods'
+import { neighbourhoodDistanceKm, neighbourhoodLabel } from '../neighbourhoods'
+import { useAuth } from '../auth/AuthContext'
+import { nameColor } from '../components/avatar'
 import type { Dict } from '../i18n/en'
 import { categoryColor } from '../categoryColors'
 import { formatDen, formatWhen } from './RequesterDashboard'
@@ -26,9 +28,22 @@ function sentAgo(t: Dict, iso: string) {
   return t.gdash.sent(Math.floor(minutes / (60 * 24)), 'd')
 }
 
+// A direct request expires 24 hours after it was sent (BookingLifecycleJob.REQUEST_TTL on the backend).
+const REQUEST_TTL_MS = 24 * 60 * 60 * 1000
+
+function expiresIn(t: Dict, expiresAt: string | undefined, requestedAt: string) {
+  const end = expiresAt ? new Date(expiresAt).getTime() : new Date(requestedAt).getTime() + REQUEST_TTL_MS
+  const minutes = Math.floor((end - Date.now()) / 60000)
+  if (Number.isNaN(minutes)) return ''
+  return minutes < 60 ? t.gdash.expires(minutes, 'm') : t.gdash.expires(Math.floor(minutes / 60), 'h')
+}
+
+
 export default function GiverDashboard() {
   const { t, lang } = useI18n()
+  const { me } = useAuth()
   const dash = useAsync(() => meApi.giverDashboard())
+  const listing = useAsync(() => (me ? giversApi.get(me.id) : Promise.resolve(null)), [me?.id])
   useLiveRefresh(() => { dash.refresh(); offers.refresh() })
   // Pending offers this giver sent on open favors, with the favor title for context.
   const offers = useAsync(async () => {
@@ -52,6 +67,14 @@ export default function GiverDashboard() {
     }
   }
 
+  const complete = async (bookingId: number) => {
+    setBusy(bookingId)
+    setActionError(null)
+    try { await bookingsApi.complete(bookingId); dash.reload() }
+    catch (err) { setActionError((err as Error).message) }
+    finally { setBusy(null) }
+  }
+
   const when = (whenType: 'ASAP' | 'SCHEDULED', whenAt: string | null) =>
     whenType === 'SCHEDULED' ? formatWhen(t, lang, whenAt) : t.favor.asap
 
@@ -60,7 +83,7 @@ export default function GiverDashboard() {
       {dash.data && (() => {
         const { stats, requests, upcoming, recentRatings } = dash.data
         return (
-          <>
+          <div className="gdash-page">
             <section className="gdash-head">
               <div>
                 <span className="eyebrow">{t.gdash.eyebrow}</span>
@@ -79,6 +102,14 @@ export default function GiverDashboard() {
                 <span>{t.gdash.avgRating}</span>
                 <strong>{stats.ratingCount > 0 ? Number(stats.ratingAvg).toFixed(1) : '—'}</strong>
               </div>
+              <div className="card gdash-stat">
+                <span>{t.gdash.acceptRate}</span>
+                <strong>{stats.acceptRate != null ? `${stats.acceptRate}%` : '—'}</strong>
+              </div>
+              <div className="card gdash-stat">
+                <span>{t.gdash.earned}</span>
+                <strong>{formatDen(stats.earnedThisMonth)} <small>{t.dash.den}</small></strong>
+              </div>
             </div>
 
             <div className="dash-grid">
@@ -88,16 +119,21 @@ export default function GiverDashboard() {
                 {requests.length === 0 && <div className="card muted">{t.gdash.noRequests}</div>}
                 {requests.map((r) => {
                   const category = lang === 'mk' ? r.categoryNameMk : r.categoryNameEn
+                  const km = neighbourhoodDistanceKm(me?.neighbourhood ?? '', r.neighbourhood)
                   return (
                     <article className="card incoming" key={r.bookingId}>
                       <div className="incoming-top">
-                        <span className="tile" style={{ background: categoryColor(r.categoryKey) }}>{initials(r.requesterName ?? '')}</span>
+                        <span className="tile" style={{ background: nameColor(r.requesterName) }}>{initials(r.requesterName ?? '')}</span>
                         <div className="request-text">
                           <strong className="incoming-name">{r.requesterName}</strong>
-                          <span className="muted">{[category, neighbourhoodLabel(r.neighbourhood, lang), when(r.whenType, r.whenAt)].filter(Boolean).join(' · ')}</span>
+                          <span className="incoming-meta">
+                            <i className="cat-dot" style={{ background: categoryColor(r.categoryKey) }} />
+                            {[category, neighbourhoodLabel(r.neighbourhood, lang) + (km != null ? ` (${t.matches.km(km)})` : ''), when(r.whenType, r.whenAt)].filter(Boolean).join(' · ')}
+                          </span>
                         </div>
                         <div className="incoming-price">
                           {r.price != null && <strong>{formatDen(r.price)} {t.dash.den}</strong>}
+                          <span className="muted small">{expiresIn(t, r.expiresAt, r.requestedAt)}</span>
                           <span className="muted small">{sentAgo(t, r.requestedAt)}</span>
                         </div>
                       </div>
@@ -120,7 +156,10 @@ export default function GiverDashboard() {
                           <span className="muted">{[u.requesterName, when(u.whenType, u.whenAt)].filter(Boolean).join(' · ')}</span>
                         </div>
                         {u.price != null && <span className="request-price">{formatDen(u.price)} {t.dash.den}</span>}
-                        <Link to={`/bookings/${u.bookingId}`} className="button">{t.gdash.open}</Link>
+                        <div className="btn-row">
+                          <button className="primary" disabled={busy === u.bookingId} onClick={() => complete(u.bookingId)}>{t.booking.complete}</button>
+                          <Link to={`/bookings/${u.bookingId}`} className="button">{t.gdash.open}</Link>
+                        </div>
                       </div>
                     ))}
                   </>
@@ -143,12 +182,13 @@ export default function GiverDashboard() {
                 )}
               </div>
 
+              <div className="side-col">
               <aside className="card side-card">
                 <h3>{t.gdash.recentRatings}</h3>
                 {recentRatings.length === 0 && <p className="muted small">{t.gdash.noRatings}</p>}
                 {recentRatings.map((r, i) => (
                   <div className="rating-row" key={i}>
-                    <span className="avatar">{initials(r.authorName ?? '')}</span>
+                    <span className="avatar" style={{ background: nameColor(r.authorName) }}>{initials(r.authorName ?? '')}</span>
                     <div>
                       <div><strong>{shortName(r.authorName)}</strong> <span className="stars" aria-label={`${r.stars}/5`}>{stars(r.stars)}</span></div>
                       {r.text && <p className="muted small">{r.text}</p>}
@@ -156,8 +196,23 @@ export default function GiverDashboard() {
                   </div>
                 ))}
               </aside>
+
+              {listing.data && (
+                <aside className="card listing-card">
+                  <span className="eyebrow-text">{t.gdash.listing}</span>
+                  <p>{listing.data.categories.length > 0 ? t.gdash.listingSub(listing.data.categories.length) : t.gdash.noListing}</p>
+                  {listing.data.categories.map((c) => (
+                    <div className="listing-row" key={c.categoryId}>
+                      <span>{lang === 'mk' ? c.nameMk : c.nameEn}</span>
+                      <strong>{formatDen(c.price)} {t.dash.den}</strong>
+                    </div>
+                  ))}
+                  <Link to="/giver/onboarding" className="button">{t.gdash.editListing}</Link>
+                </aside>
+              )}
+              </div>
             </div>
-          </>
+          </div>
         )
       })()}
     </Async>
