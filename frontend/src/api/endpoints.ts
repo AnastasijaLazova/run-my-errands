@@ -23,6 +23,8 @@ export const meApi = {
 
 export const categoriesApi = { list: () => api<T.Category[]>('/categories') }
 
+export const publicApi = { landing: () => api<T.Landing>('/public/landing') }
+
 export const giversApi = { get: (id: number) => api<T.GiverProfile>(`/givers/${id}`) }
 
 export const favorsApi = {

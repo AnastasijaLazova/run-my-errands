@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 import { NeighbourhoodInput } from '../components/NeighbourhoodInput'
@@ -11,8 +11,16 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   const { login, register } = useAuth()
   const { t, lang, setLang } = useI18n()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  // Set by the landing page: ?role=GIVER preselects the role, ?next= is where to go after (same-site paths only).
+  const next = params.get('next')
+  const safeNext = next?.startsWith('/') && !next.startsWith('//') ? next : null
+  const query = params.toString() ? `?${params}` : ''
   const [form, setForm] = useState({ displayName: '', email: '', password: '', neighbourhood: '', phone: '' })
-  const [role, setRole] = useState<SignupRole>('REQUESTER')
+  const [role, setRole] = useState<SignupRole>(() => {
+    const r = params.get('role') as SignupRole | null
+    return r && ROLES.includes(r) ? r : 'REQUESTER'
+  })
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value })
@@ -24,11 +32,11 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
     try {
       if (mode === 'login') {
         await login(form.email, form.password)
-        navigate('/')
+        navigate(safeNext ?? '/')
       } else {
         await register({ ...form, phone: form.phone || undefined, role })
         // Givers need categories + prices before anyone can be matched to them.
-        navigate(role === 'REQUESTER' ? '/' : '/giver/onboarding')
+        navigate(role === 'REQUESTER' ? safeNext ?? '/' : '/giver/onboarding')
       }
     } catch (err) {
       setError((err as Error).message)
@@ -40,7 +48,7 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   return (
     <div className="auth">
       <section className="auth-hero">
-        <div className="auth-brand"><span className="auth-logo">R</span>{t.appName}</div>
+        <Link to="/welcome" className="auth-brand"><span className="auth-logo">R</span>{t.appName}</Link>
         <div>
           <h1>{t.auth.heroTitle}</h1>
           <p>{t.auth.heroSub}</p>
@@ -52,8 +60,8 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
         <button className="auth-lang" onClick={() => setLang(lang === 'en' ? 'mk' : 'en')}>{lang === 'en' ? 'МК' : 'EN'}</button>
         <form className="auth-form" onSubmit={submit}>
           <div className="auth-tabs">
-            <NavLink to="/login" replace>{t.auth.signIn}</NavLink>
-            <NavLink to="/register" replace>{t.auth.createAccount}</NavLink>
+            <NavLink to={`/login${query}`} replace>{t.auth.signIn}</NavLink>
+            <NavLink to={`/register${query}`} replace>{t.auth.createAccount}</NavLink>
           </div>
 
           {mode === 'register' && (

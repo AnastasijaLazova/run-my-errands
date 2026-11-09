@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { categoriesApi, favorsApi } from '../api/endpoints'
 import { useAsync } from '../components/useAsync'
 import { useI18n } from '../i18n/I18nContext'
@@ -49,12 +49,18 @@ export default function PostFavor() {
   const editId = params.id ? Number(params.id) : null
   const { data: categories } = useAsync(() => categoriesApi.list())
   const existing = useAsync(() => (editId ? favorsApi.get(editId) : Promise.resolve(null)), [editId])
+  // The landing page's builder sends ?category=<key>&budget=<den>&when=now|tomorrow|week.
+  const [prefill] = useSearchParams()
+  const prefillBudget = Number(prefill.get('budget'))
+  const prefillWhen = prefill.get('when')
 
   const [categoryId, setCategoryId] = useState<number | null>(null)
-  const [price, setPrice] = useState(450)
+  const [price, setPrice] = useState(() =>
+    !editId && prefillBudget ? Math.min(PRICE_MAX, Math.max(PRICE_MIN, prefillBudget)) : 450)
   // When editing, only send the price if it was moved, so a budget outside the slider range isn't clamped.
   const [priceTouched, setPriceTouched] = useState(false)
-  const [slotKey, setSlotKey] = useState<SlotKey>('now')
+  const [slotKey, setSlotKey] = useState<SlotKey>(() =>
+    !editId && (prefillWhen === 'tomorrow' || prefillWhen === 'week') ? prefillWhen : 'now')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   // Prefilled with where the requester lives; editable when the errand is somewhere else.
@@ -62,6 +68,12 @@ export default function PostFavor() {
   const [agreed, setAgreed] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    const key = prefill.get('category')
+    const match = !editId && key ? categories?.find((c) => c.key === key) : undefined
+    if (match) setCategoryId(match.id)
+  }, [categories]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const favor = existing.data
   useEffect(() => {

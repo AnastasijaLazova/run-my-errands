@@ -39,7 +39,7 @@ function UserMenu() {
             ? <Link to="/giver">{t.nav.giverHome}</Link>
             : <Link to="/giver/onboarding">{t.nav.becomeGiver}</Link>}
           <Link to="/settings">{t.nav.settings}</Link>
-          <button onClick={() => { logout(); navigate('/login') }}>{t.nav.logout}</button>
+          <button onClick={() => { logout(); navigate('/welcome') }}>{t.nav.logout}</button>
         </div>
       )}
     </div>

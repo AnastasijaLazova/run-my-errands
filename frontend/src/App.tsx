@@ -3,6 +3,7 @@ import { useAuth } from './auth/AuthContext'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthPage from './pages/AuthPage'
+import Landing from './pages/Landing'
 import RequesterDashboard from './pages/RequesterDashboard'
 import PostFavor from './pages/PostFavor'
 import Matches from './pages/Matches'
@@ -23,9 +24,16 @@ function Home() {
   return <RequesterDashboard />
 }
 
+/** The public landing page; signed-in users go straight to their home. */
+function Welcome() {
+  const { me } = useAuth()
+  return me ? <Navigate to="/" replace /> : <Landing />
+}
+
 export default function App() {
   return (
     <Routes>
+      <Route path="/welcome" element={<Welcome />} />
       <Route path="/login" element={<AuthPage mode="login" />} />
       <Route path="/register" element={<AuthPage mode="register" />} />
       <Route element={<Layout />}>

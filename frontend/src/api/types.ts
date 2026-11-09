@@ -10,6 +10,13 @@ export interface Me {
   avatarUrl: string | null; locale: 'en' | 'mk'; requester: boolean; giver: boolean
 }
 
+/** Public data for the landing page (GET /public/landing). */
+export interface Landing {
+  categories: { id: number; key: string; nameEn: string; nameMk: string; trustTier: Category['trustTier']; fromPrice: number | null; giverCount: number }[]
+  stats: { categoryCount: number; giverCount: number; completedCount: number }
+  givers: { name: string; neighbourhood: string; ratingAvg: number; ratingCount: number; fromPrice: number }[]
+  reviews: { authorName: string; stars: number; text: string; categoryKey: string; categoryNameEn: string; categoryNameMk: string }[]
+}
 export interface Category { id: number; key: string; nameEn: string; nameMk: string; trustTier: 'LOW' | 'MEDIUM' | 'HIGH' }
 
 export interface Favor {
