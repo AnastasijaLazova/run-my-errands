@@ -5,6 +5,8 @@ import com.runmyerrands.favor.Favor;
 import com.runmyerrands.favor.FavorRepository;
 import com.runmyerrands.offer.Offer;
 import com.runmyerrands.offer.OfferRepository;
+import com.runmyerrands.payment.Payment;
+import com.runmyerrands.payment.PaymentRepository;
 import com.runmyerrands.review.ReviewRepository;
 import com.runmyerrands.user.GiverCategoryRepository;
 import com.runmyerrands.user.User;
@@ -37,6 +39,7 @@ public class BookingService {
     private final GiverCategoryRepository giverCategoryRepository;
     private final OfferRepository offerRepository;
     private final ReviewRepository reviewRepository;
+    private final PaymentRepository paymentRepository;
     private final ApplicationEventPublisher events;
 
     /** Path 1: Requester books a Giver directly from Matches. Starts at REQUESTED. */
@@ -105,6 +108,11 @@ public class BookingService {
                 || event == BookingStateMachine.Event.COMPLETE) && !isGiver) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the giver can do this");
         }
+        // The giver only gets paid out of held money, so the job can't be finished before the requester pays.
+        if (event == BookingStateMachine.Event.COMPLETE
+                && !paymentRepository.existsByBookingIdAndStatus(bookingId, Payment.Status.HELD)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The requester hasn't paid for this booking yet");
+        }
 
         booking.setStatus(BookingStateMachine.transition(booking.getStatus(), event));
         booking.setRespondedAt(Instant.now());
@@ -117,8 +125,9 @@ public class BookingService {
         }
         if (event == BookingStateMachine.Event.COMPLETE) setFavorStatus(booking.getFavorId(), Favor.Status.CLOSED);
         bookingRepository.save(booking);
+        // Listeners settle any held payment here (see PaymentService), so read its status afterwards.
         events.publishEvent(new BookingStatusChanged(booking.getId(), actor.getId()));
-        return BookingDto.from(booking);
+        return BookingDto.from(booking, paymentStatus(booking.getId()));
     }
 
     /** Called by BookingLifecycleJob for a REQUESTED booking the giver never answered. Reopens the favor. */
@@ -160,6 +169,8 @@ public class BookingService {
                 .collect(Collectors.toMap(User::getId, User::getDisplayName));
         Map<Long, Favor> favors = favorRepository.findAllById(list.stream().map(Booking::getFavorId).collect(Collectors.toSet()))
                 .stream().collect(Collectors.toMap(Favor::getId, Function.identity()));
+        Map<Long, String> payments = paymentRepository.findByBookingIdIn(list.stream().map(Booking::getId).toList())
+                .stream().collect(Collectors.toMap(Payment::getBookingId, p -> p.getStatus().name()));
 
         return list.stream().map(b -> {
             Long otherId = asGiver ? b.getRequesterId() : b.getGiverId();
@@ -171,7 +182,7 @@ public class BookingService {
             return new BookingListItemDto(b.getId(), b.getFavorId(), b.getStatus().name(), b.getOrigin().name(),
                     b.getPrice() != null ? b.getPrice() : f.getBudget(), b.getRequestedAt(), b.getCompletedAt(), expiresAt,
                     otherId, names.get(otherId), f.getTitle(), f.getCategory().getKey(),
-                    f.getCategory().getNameEn(), f.getCategory().getNameMk(), f.getWhenType().name(), f.getWhenAt(), myStars);
+                    f.getCategory().getNameEn(), f.getCategory().getNameMk(), f.getWhenType().name(), f.getWhenAt(), myStars, payments.get(b.getId()));
         }).toList();
     }
 
@@ -179,7 +190,11 @@ public class BookingService {
     public BookingDto get(Long id, User user) {
         Booking booking = findOrThrow(id);
         assertParticipant(booking, user.getId());
-        return BookingDto.from(booking);
+        return BookingDto.from(booking, paymentStatus(id));
+    }
+
+    private String paymentStatus(Long bookingId) {
+        return paymentRepository.findByBookingId(bookingId).map(p -> p.getStatus().name()).orElse(null);
     }
 
     /** The phone number is only released after confirmation, and only to the two participants. */

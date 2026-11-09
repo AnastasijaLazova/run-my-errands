@@ -57,6 +57,12 @@ export const bookingsApi = {
   contact: (id: number) => api<T.Contact>(`/bookings/${id}/contact`),
 }
 
+export const paymentsApi = {
+  get: (bookingId: number) => api<T.Payment>(`/bookings/${bookingId}/payment`),
+  pay: (bookingId: number, card: T.PayInput) => api<T.Payment>(`/bookings/${bookingId}/pay`, { method: 'POST', body: card }),
+  cancelPreview: (bookingId: number) => api<T.CancelPreview>(`/bookings/${bookingId}/cancel-preview`),
+}
+
 export const reviewsApi = {
   submit: (bookingId: number, b: { stars: number; text?: string }) =>
     api(`/bookings/${bookingId}/review`, { method: 'POST', body: b }),

@@ -6,6 +6,7 @@ import { Async } from '../components/Status'
 import { useI18n } from '../i18n/I18nContext'
 import type { Dict } from '../i18n/en'
 import { initials, nameColor } from '../components/avatar'
+import { formatDen } from './RequesterDashboard'
 import { useLiveRefresh, useNotifications } from '../notifications/NotificationsContext'
 
 /** Where tapping a notification takes you. */
@@ -78,7 +79,8 @@ export default function Notifications() {
               </span>
               <span className="notif-body">
                 <span className="notif-text">
-                  {t.notifications.text[n.type](n.actorName || t.notifications.someone, n.favorTitle || t.notifications.aFavor)}
+                  {t.notifications.text[n.type](n.actorName || t.notifications.someone, n.favorTitle || t.notifications.aFavor,
+                    n.amount != null ? `${formatDen(n.amount)} ${t.dash.den}` : '')}
                 </span>
                 <time className="muted small" dateTime={n.createdAt}
                       title={new Date(n.createdAt).toLocaleString(lang, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}>

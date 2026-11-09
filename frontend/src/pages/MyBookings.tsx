@@ -85,6 +85,8 @@ export default function MyBookings() {
                   <span className="muted small">{[category(b), when(b), b.price != null ? `${formatDen(b.price)} ${t.dash.den}` : null].filter(Boolean).join(' · ')}</span>
                 </div>
                 <span className="badge outline">{t.bdetail.status[b.status]}</span>
+                {b.status === 'CONFIRMED' &&
+                  <span className={`badge ${b.paymentStatus ? 'grey' : 'amber'}`}>{t.pay.status[b.paymentStatus ?? 'UNPAID']}</span>}
               </div>
 
               <ol className="steps">
@@ -113,8 +115,10 @@ export default function MyBookings() {
                 {b.status === 'CONFIRMED' && <>
                   <h3>{t.mybookings.confirmedTitle}</h3>
                   <p>{asGiver ? t.mybookings.confirmedGiver(name) : t.mybookings.confirmedRequester(name)}</p>
+                  {!b.paymentStatus && <p className="small muted">{asGiver ? t.pay.awaitingGiver : t.pay.awaitingRequester}</p>}
                   <div className="btn-row center">
-                    {asGiver && <button className="primary" disabled={busy === b.id} onClick={act(b.id, () => bookingsApi.complete(b.id))}>{t.booking.complete}</button>}
+                    {asGiver && <button className="primary" disabled={busy === b.id || !b.paymentStatus} onClick={act(b.id, () => bookingsApi.complete(b.id))}>{t.booking.complete}</button>}
+                    {!asGiver && !b.paymentStatus && <Link to={`/bookings/${b.id}`} className="button primary">{t.pay.payShort}</Link>}
                     <Link to={`/bookings/${b.id}`} className="button">{t.mybookings.open}</Link>
                   </div>
                 </>}
@@ -142,6 +146,7 @@ export default function MyBookings() {
             {b.myStars != null
               ? <span className="stars" aria-label={`${b.myStars}/5`}>{starText(b.myStars)}</span>
               : <StatusPill status={b.status} label={t.bdetail.status[b.status]} />}
+            {b.paymentStatus?.includes('REFUNDED') && <span className="badge grey">{t.pay.status[b.paymentStatus]}</span>}
             {b.price != null && <strong className="past-price">{formatDen(b.price)} {t.dash.den}</strong>}
           </Link>
         ))}

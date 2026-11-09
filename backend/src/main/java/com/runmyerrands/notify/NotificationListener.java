@@ -8,6 +8,9 @@ import com.runmyerrands.favor.FavorRepository;
 import com.runmyerrands.offer.Offer;
 import com.runmyerrands.offer.OfferRepository;
 import com.runmyerrands.offer.OfferStatusChanged;
+import com.runmyerrands.payment.Payment;
+import com.runmyerrands.payment.PaymentChanged;
+import com.runmyerrands.payment.PaymentRepository;
 import com.runmyerrands.review.Review;
 import com.runmyerrands.review.ReviewPublished;
 import com.runmyerrands.review.ReviewRepository;
@@ -16,6 +19,8 @@ import com.runmyerrands.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 import static com.runmyerrands.notify.Notification.Type.*;
 
@@ -33,6 +38,7 @@ public class NotificationListener {
     private final FavorRepository favorRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final PaymentRepository paymentRepository;
 
     @EventListener
     public void on(BookingStatusChanged event) {
@@ -77,12 +83,39 @@ public class NotificationListener {
                 .ifPresent(b -> notify(r.getTargetId(), REVIEW_RECEIVED, b, r.getAuthorId()));
     }
 
+    @EventListener
+    public void on(PaymentChanged event) {
+        Payment p = paymentRepository.findById(event.paymentId()).orElse(null);
+        if (p == null) return;
+        Booking b = bookingRepository.findById(p.getBookingId()).orElse(null);
+        if (b == null) return;
+        switch (p.getStatus()) {
+            case HELD -> notify(b.getGiverId(), PAYMENT_RECEIVED, b, b.getRequesterId(), p.getAmount());
+            case RELEASED -> notify(b.getGiverId(), PAYOUT_RELEASED, b, b.getRequesterId(), p.getGiverPayout());
+            case REFUNDED -> notify(b.getRequesterId(), REFUND_ISSUED, b, b.getGiverId(), p.getRefundAmount());
+            case PARTIALLY_REFUNDED -> {
+                notify(b.getRequesterId(), REFUND_ISSUED, b, b.getGiverId(), p.getRefundAmount());
+                notify(b.getGiverId(), PAYOUT_RELEASED, b, b.getRequesterId(), p.getGiverPayout());
+            }
+        }
+    }
+
     private void notify(Long recipientId, Notification.Type type, Booking b, Long actorId) {
-        save(recipientId, type, b.getId(), b.getOfferId(), favorRepository.findById(b.getFavorId()).orElse(null), actorId);
+        notify(recipientId, type, b, actorId, null);
+    }
+
+    private void notify(Long recipientId, Notification.Type type, Booking b, Long actorId, BigDecimal amount) {
+        save(recipientId, type, b.getId(), b.getOfferId(), favorRepository.findById(b.getFavorId()).orElse(null), actorId, amount);
     }
 
     private void save(Long recipientId, Notification.Type type, Long bookingId, Long offerId, Favor favor, Long actorId) {
+        save(recipientId, type, bookingId, offerId, favor, actorId, null);
+    }
+
+    private void save(Long recipientId, Notification.Type type, Long bookingId, Long offerId, Favor favor, Long actorId,
+                      BigDecimal amount) {
         Notification n = new Notification();
+        n.setAmount(amount);
         n.setUserId(recipientId);
         n.setType(type);
         n.setBookingId(bookingId);

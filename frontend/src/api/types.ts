@@ -46,7 +46,22 @@ export interface Booking {
   id: number; favorId: number; requesterId: number; giverId: number; origin: 'DIRECT_REQUEST' | 'GIVER_OFFER'
   offerId: number | null; status: BookingStatus; note: string | null; price: number | null; requestedAt: string
   respondedAt: string | null; completedAt: string | null; cancelReason: string | null
+  paymentStatus: PaymentStatus | null
 }
+
+export type PaymentStatus = 'HELD' | 'RELEASED' | 'REFUNDED' | 'PARTIALLY_REFUNDED'
+
+/** Before paying, status is UNPAID and only the amounts are set. */
+export interface Payment {
+  bookingId: number; status: PaymentStatus | 'UNPAID'; amount: number; fee: number; total: number
+  cardBrand: string | null; cardLast4: string | null; paidAt: string | null; freeCancelUntil: string | null
+  refundAmount: number | null; giverPayout: number | null; settledAt: string | null
+}
+
+export interface PayInput { cardNumber: string; expiry: string; cvc: string; holderName: string }
+
+/** What cancelling now would do; paid=false means nothing was charged. */
+export interface CancelPreview { paid: boolean; refund: number; giverPayout: number; free: boolean; freeUntil: string | null }
 
 export interface BookingListItem {
   id: number; favorId: number; status: BookingStatus; origin: 'DIRECT_REQUEST' | 'GIVER_OFFER'; price: number | null
@@ -54,6 +69,7 @@ export interface BookingListItem {
   otherUserId: number; otherName: string | null
   favorTitle: string; categoryKey: string; categoryNameEn: string; categoryNameMk: string
   whenType: 'ASAP' | 'SCHEDULED'; whenAt: string | null; myStars: number | null
+  paymentStatus: PaymentStatus | null
 }
 
 export interface Contact { phone: string | null; displayName: string }
@@ -90,8 +106,9 @@ export interface ReviewStatus { mineSubmitted: boolean; theirsSubmitted: boolean
 export type NotificationType =
   | 'BOOKING_REQUESTED' | 'BOOKING_ACCEPTED' | 'BOOKING_DECLINED' | 'BOOKING_CANCELLED' | 'BOOKING_COMPLETED'
   | 'BOOKING_EXPIRED' | 'OFFER_RECEIVED' | 'OFFER_ACCEPTED' | 'OFFER_REJECTED' | 'REVIEW_RECEIVED'
+  | 'PAYMENT_RECEIVED' | 'PAYOUT_RELEASED' | 'REFUND_ISSUED'
 
 export interface AppNotification {
   id: number; type: NotificationType; bookingId: number | null; offerId: number | null; favorId: number | null
-  actorName: string | null; favorTitle: string | null; createdAt: string; read: boolean
+  actorName: string | null; favorTitle: string | null; amount: number | null; createdAt: string; read: boolean
 }

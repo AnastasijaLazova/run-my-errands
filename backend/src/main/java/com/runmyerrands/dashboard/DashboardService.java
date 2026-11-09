@@ -9,6 +9,7 @@ import com.runmyerrands.dashboard.dto.RequesterDashboardDto.*;
 import com.runmyerrands.favor.Favor;
 import com.runmyerrands.favor.FavorRepository;
 import com.runmyerrands.favor.FavorService;
+import com.runmyerrands.payment.PaymentRepository;
 import com.runmyerrands.review.Review;
 import com.runmyerrands.review.ReviewRepository;
 import com.runmyerrands.user.GiverProfile;
@@ -44,6 +45,7 @@ public class DashboardService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final GiverProfileRepository giverProfileRepository;
+    private final PaymentRepository paymentRepository;
 
     @Transactional(readOnly = true)
     public RequesterDashboardDto requester(User me) {
@@ -91,10 +93,8 @@ public class DashboardService {
 
         Instant monthStart = LocalDate.now(SKOPJE).withDayOfMonth(1).atStartOfDay(SKOPJE).toInstant();
         List<Booking> done = bookings.stream().filter(b -> DONE.contains(b.getStatus())).toList();
-        BigDecimal spent = done.stream()
-                .filter(b -> b.getCompletedAt() != null && !b.getCompletedAt().isBefore(monthStart))
-                .map(b -> b.getPrice() != null ? b.getPrice() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // What was charged (fees included) minus refunds.
+        BigDecimal spent = paymentRepository.sumSpentSince(me.getId(), monthStart);
 
         Stats stats = new Stats(done.size(), me.getRequesterRatingAvg(), me.getRequesterRatingCount(), spent);
         return new RequesterDashboardDto(stats, rows, toRate);
@@ -160,10 +160,8 @@ public class DashboardService {
         Integer acceptRate = answered.isEmpty() ? null : (int) Math.round(100.0 * accepted / answered.size());
 
         Instant monthStart = LocalDate.now(SKOPJE).withDayOfMonth(1).atStartOfDay(SKOPJE).toInstant();
-        BigDecimal earned = bookings.stream()
-                .filter(b -> DONE.contains(b.getStatus()) && b.getCompletedAt() != null && !b.getCompletedAt().isBefore(monthStart))
-                .map(b -> b.getPrice() != null ? b.getPrice() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Money actually paid out: completed jobs plus compensation for late cancellations.
+        BigDecimal earned = paymentRepository.sumGiverPayoutSince(me.getId(), monthStart);
 
         GiverDashboardDto.Stats stats = new GiverDashboardDto.Stats(completed,
                 profile.map(GiverProfile::getRatingAvg).orElse(BigDecimal.ZERO),
