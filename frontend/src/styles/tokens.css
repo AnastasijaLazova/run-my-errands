@@ -15,5 +15,15 @@
   --map-bg: #FBF4EA;
   --map-grid: #F0E4D4;
   --map-ring: #A78BFA;
+  /* Brighter palette shared with the landing page */
+  --deep: #10241C;
+  --mint: #8CD3B4;
+  --lime: #D9F27A;
+  --sun: #F5B82E;
+  --sun-soft: #FFF1CF;
+  --peach: #FFD6C9;
+  --violet: #6A5AE0;
+  --violet-soft: #E8DDF9;
+  --sky: #DCEFFB;
   --font: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }

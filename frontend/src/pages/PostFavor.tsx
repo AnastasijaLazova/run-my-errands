@@ -6,7 +6,7 @@ import { useI18n } from '../i18n/I18nContext'
 import type { Dict } from '../i18n/en'
 import { useAuth } from '../auth/AuthContext'
 import { NeighbourhoodInput } from '../components/NeighbourhoodInput'
-import { categoryColor } from '../categoryColors'
+import { categoryTile } from '../categoryColors'
 import { formatDen, formatWhen } from './RequesterDashboard'
 
 const PRICE_MIN = 100
@@ -150,7 +150,7 @@ export default function PostFavor() {
             const active = c.id === selectedCategory
             return (
               <button type="button" key={c.id} className={`chip${active ? ' active' : ''}`} aria-pressed={active} disabled={editId != null} onClick={() => setCategoryId(c.id)}>
-                <span className="chip-tile" style={{ background: categoryColor(c.key) }}>{name.trim()[0]?.toUpperCase()}</span>
+                <span className="chip-tile" style={{ background: categoryTile(c.key)[0], color: categoryTile(c.key)[1] }}>{name.trim()[0]?.toUpperCase()}</span>
                 {name}
               </button>
             )

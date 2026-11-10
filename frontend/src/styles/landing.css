@@ -37,7 +37,7 @@
 /* hero */
 .lp-hero { position: relative; padding: 56px 24px 72px; overflow: hidden; }
 /* Sits fully inside the hero (only the left edge bleeds off-screen) so the hero's bottom never cuts it flat. */
-.lp-hero-sun { left: -130px; top: 50%; transform: translateY(-50%); width: 260px; height: 260px; border-radius: 999px; background: var(--lp-peach); }
+.lp-hero-sun { left: -130px; top: 50%; transform: translateY(-50%); width: 260px; height: 260px; border-radius: 999px; background: var(--lp-sky); }
 .lp-hero-dots { left: 46%; top: 30px; width: 90px; height: 50px; background-image: radial-gradient(var(--lp-sun) 3px, transparent 3.5px); background-size: 18px 18px; }
 .lp-hero-row { position: relative; display: flex; flex-wrap: wrap; gap: 48px; align-items: center; }
 .lp-hero-copy { flex: 1 1 520px; min-width: 0; }
@@ -50,18 +50,19 @@
 .lp-builder-wrap { flex: 1 1 460px; min-width: 0; position: relative; }
 .lp-ring { right: -24px; top: -28px; width: 70px; height: 70px; border-radius: 999px; border: 7px solid var(--lp-sun); }
 .lp-square { left: -22px; bottom: -22px; width: 54px; height: 54px; border-radius: 16px; background: var(--lp-violet); transform: rotate(-12deg); }
-.lp-builder { position: relative; z-index: 1; background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: 28px; box-shadow: 0 16px 40px rgba(16, 36, 28, .10); transform: rotate(2deg); }
-.lp-sentence { margin: 0 0 20px; font-size: 22px; line-height: 2; font-weight: 600; color: var(--lp-ink); }
-.lp-sel { display: inline-block; vertical-align: middle; border-radius: 999px; padding: 4px 16px; font-weight: 800; font-size: 19px; line-height: 1.5; transform: rotate(-3deg); }
+.lp-builder { position: relative; z-index: 1; background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: 28px; box-shadow: 0 16px 40px rgba(16, 36, 28, .10); }
+.lp-sentence { margin: 0 0 24px; font-size: 22px; line-height: 2.1; font-weight: 600; color: var(--lp-ink); }
+/* Category picker: a native select dressed as the coloured pill, chevron drawn on top. */
+.lp-sel { position: relative; display: inline-flex; align-items: center; vertical-align: middle; border-radius: 999px; line-height: 1.5; }
+.lp-sel select { appearance: none; -webkit-appearance: none; border: none; background: transparent; color: inherit; font: inherit; font-weight: 800; font-size: 19px; padding: 4px 38px 4px 16px; border-radius: 999px; cursor: pointer; max-width: 100%; }
+.lp-sel select:focus-visible { outline: 3px solid var(--lp-mint); outline-offset: 2px; }
+.lp-sel select option { color: var(--lp-ink); background: #fff; }
+.lp-sel svg { position: absolute; right: 14px; pointer-events: none; }
 .lp-price { display: inline-flex; align-items: center; gap: 4px; background: #FFF1CF; border-radius: 999px; padding: 2px 6px; vertical-align: middle; line-height: 1.5; }
 .lp-price > span { font-weight: 800; font-size: 19px; padding: 0 4px; color: #8A5E00; }
-.lp-price button { width: 32px; height: 32px; border: none; border-radius: 999px; background: #fff; font-weight: 800; font-size: 17px; color: var(--lp-ink); }
+.lp-price button { width: 32px; height: 32px; padding: 0; display: inline-grid; place-items: center; line-height: 1; border: none; border-radius: 999px; background: #fff; font-weight: 800; font-size: 17px; color: var(--lp-ink); }
 .lp-slot { border: none; background: #E8DDF9; color: #5B3DC8; border-radius: 999px; padding: 6px 16px; font-weight: 800; font-size: 18px; vertical-align: middle; line-height: 1.5; }
-.lp-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
-.lp-chips button { border: none; border-radius: 999px; padding: 9px 14px; font-weight: 700; font-size: 14px; opacity: .9; }
-.lp-chips button.active { opacity: 1; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--lp-green); }
-.lp-chip-more { display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; color: var(--lp-green); border: 1.5px dashed var(--lp-green); }
-.lp-builder-cta { width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; border: none; background: var(--lp-green); color: #fff; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 17px; }
+.lp-builder-cta { width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; border: none; background: var(--lp-green); color: #fff; padding: 16px; border-radius: 999px; font-weight: 800; font-size: 17px; }
 .lp-builder-cta:hover { filter: brightness(1.08); }
 
 /* side decorations: shapes in the left/right gutters, only where the gutters are wide enough */
@@ -209,7 +210,7 @@
 
 /* final call to action */
 .lp-cta { padding: 88px 24px; position: relative; overflow: hidden; }
-.lp-cta-a { left: 6%; top: 40px; width: 110px; height: 110px; border-radius: 999px; background: var(--lp-peach); }
+.lp-cta-a { left: 6%; top: 40px; width: 110px; height: 110px; border-radius: 999px; background: var(--lp-sky); }
 .lp-cta-b { right: 8%; bottom: 40px; width: 140px; height: 90px; background: var(--lp-lime); border-radius: 60% 40% 50% 50%; }
 .lp-cta-inner { position: relative; max-width: 720px; margin: 0 auto; text-align: center; }
 .lp-cta h2 { margin: 0 0 14px; font-size: clamp(34px, 4.4vw, 54px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 800; }

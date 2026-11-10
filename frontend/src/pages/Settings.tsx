@@ -4,6 +4,7 @@ import type { Me } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 import { NeighbourhoodInput } from '../components/NeighbourhoodInput'
+import { initials } from '../components/avatar'
 
 type Form = { displayName: string; phone: string; neighbourhood: string; locale: Me['locale'] }
 
@@ -57,7 +58,15 @@ export default function Settings() {
         <p className="muted">{t.settings.sub}</p>
       </header>
 
-      <section className="card post-card">
+      {me && (
+        <section className="card settings-id">
+          <span className="settings-avatar">{initials(me.displayName)}</span>
+          <div><strong>{me.displayName}</strong><span>{me.email}</span></div>
+          {me.neighbourhood && <span className="settings-hood">{me.neighbourhood}</span>}
+        </section>
+      )}
+
+      <section className="card post-card settings-profile">
         <h2>{t.settings.profile}</h2>
         <p className="muted small">{t.settings.profileHint}</p>
         <div className="post-fields">
@@ -83,7 +92,7 @@ export default function Settings() {
         </div>
       </section>
 
-      <section className="card post-card">
+      <section className="card post-card settings-lang">
         <h2>{t.settings.language}</h2>
         <p className="muted small">{t.settings.languageHint}</p>
         <div className="slot-grid lang-slots" role="radiogroup" aria-label={t.settings.language}>

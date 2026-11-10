@@ -27,7 +27,7 @@ export const en = {
     badge: 'Now piloting in Skopje',
     h1a: 'Your errand is', h1b: 'someone’s', h1c: 'way home.',
     sub: 'Tell us what you need and what you’ll pay. Neighbours already heading that way say yes — and they only get paid once it’s done.',
-    bNeed: 'I need help with', bFor: 'for', bCta: 'Show me neighbours', moreCats: (n: number) => `+${n} more`,
+    bNeed: 'I need help with', bFor: 'for', bCta: 'Show me neighbours',
     slots: ['as soon as possible', 'tomorrow', 'this week'],
     lowerPrice: 'Lower price', raisePrice: 'Raise price', changeTime: 'Change time',
     panelKicker: 'Post · Match · Done', panelTitle: 'Your favor, matched in minutes',
@@ -103,7 +103,6 @@ export const en = {
     checkoutTitle: 'Pay for this booking',
     checkoutSub: (name: string) => `The money is held safely and only goes to ${name} once the job is done.`,
     cardNumber: 'Card number', expiry: 'Expiry (MM/YY)', cvc: 'CVC', holder: 'Name on card',
-    demoHint: 'Demo payment — no real money moves. Any card works; one ending in 0000 is declined.',
     policyTitle: 'Cancellation policy',
     policy: [
       'Free cancellation for 10 minutes after paying, or until 24 hours before a scheduled favor.',

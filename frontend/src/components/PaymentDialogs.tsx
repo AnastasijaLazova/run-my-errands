@@ -67,24 +67,23 @@ export function CheckoutModal({ bookingId, quote, giverName, onClose, onPaid }: 
       <PriceBreakdown p={quote} />
       <form className="pay-form" onSubmit={submit}>
         <label>{t.pay.cardNumber}
-          <input inputMode="numeric" autoComplete="cc-number" placeholder="4242 4242 4242 4242" required
+          <input inputMode="numeric" autoComplete="off" placeholder="4242 4242 4242 4242" required
                  value={card.cardNumber} onChange={(e) => setCard({ ...card, cardNumber: groupCard(e.target.value) })} />
         </label>
         <div className="pay-form-row">
           <label>{t.pay.expiry}
-            <input inputMode="numeric" autoComplete="cc-exp" placeholder="12/28" required
+            <input inputMode="numeric" autoComplete="off" placeholder="12/28" required
                    value={card.expiry} onChange={(e) => setCard({ ...card, expiry: formatExpiry(e.target.value) })} />
           </label>
           <label>{t.pay.cvc}
-            <input inputMode="numeric" autoComplete="cc-csc" placeholder="123" required maxLength={4}
+            <input inputMode="numeric" autoComplete="off" placeholder="123" required maxLength={4}
                    value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value.replace(/\D/g, '') })} />
           </label>
         </div>
         <label>{t.pay.holder}
-          <input autoComplete="cc-name" required value={card.holderName}
+          <input autoComplete="off" required value={card.holderName}
                  onChange={(e) => setCard({ ...card, holderName: e.target.value })} />
         </label>
-        <p className="pay-demo small">{t.pay.demoHint}</p>
         <details className="pay-policy small">
           <summary>{t.pay.policyTitle}</summary>
           <ul>{t.pay.policy.map((line) => <li key={line}>{line}</li>)}</ul>

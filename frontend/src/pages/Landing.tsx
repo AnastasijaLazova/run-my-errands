@@ -5,18 +5,9 @@ import type { Landing as LandingData } from '../api/types'
 import { useAsync } from '../components/useAsync'
 import { useI18n } from '../i18n/I18nContext'
 import { formatDen } from './RequesterDashboard'
+import { categoryTile as tile } from '../categoryColors'
 import '../styles/landing.css'
 
-// Landing-only palette: bolder than categoryColors.ts. [background, text]
-const TILE: Record<string, [string, string]> = {
-  pharmacy: ['#2E7D6F', '#FFFFFF'], shopping: ['#F5B82E', '#10241C'], bill_payment: ['#0F7B55', '#FFFFFF'],
-  laundry: ['#DCEFFB', '#10241C'], pet_care: ['#FF7A59', '#10241C'], babysitting: ['#6A5AE0', '#FFFFFF'],
-  tutoring: ['#FFD6C9', '#10241C'], housework: ['#D9F27A', '#10241C'], cleaning: ['#8CD3B4', '#10241C'],
-  home_cooking: ['#E8DDF9', '#10241C'], yard_work: ['#5F7A3C', '#FFFFFF'], vehicle_repair: ['#10241C', '#FFFFFF'],
-  it_fixes: ['#1F5EA8', '#FFFFFF'],
-}
-const tile = (key: string): [string, string] => TILE[key] ?? ['#0F7B55', '#FFFFFF']
-const HERO_KEYS = ['pharmacy', 'shopping', 'pet_care', 'babysitting', 'cleaning', 'it_fixes', 'bill_payment', 'housework']
 // Builder time choices → PostFavor slot keys.
 const SLOT_KEYS = ['now', 'tomorrow', 'week'] as const
 const PRICE_MIN = 100
@@ -70,7 +61,6 @@ export default function Landing() {
   // Start the builder at what the default category really costs, once that's known.
   useEffect(() => { if (selected) setPrice(roundPrice(selected.fromPrice)) }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const heroCats = HERO_KEYS.map((k) => categories.find((c) => c.key === k)).filter((c) => c != null)
   const givers = data?.givers.length ? data.givers : SAMPLE_GIVERS
   const stats = data ? [
     { value: data.stats.categoryCount, label: L.statCategories },
@@ -118,7 +108,12 @@ export default function Landing() {
               <p className="lp-sentence">
                 {L.bNeed}{' '}
                 <span className="lp-sel" style={{ background: tile(selKey)[0], color: tile(selKey)[1] }}>
-                  {selected ? name(selected) : '…'}
+                  <select value={selKey} aria-label={t.favor.category}
+                    onChange={(e) => { setSelKey(e.target.value); setPrice(roundPrice(categories.find((c) => c.key === e.target.value)?.fromPrice ?? null)) }}>
+                    {categories.length === 0 && <option value={selKey}>…</option>}
+                    {categories.map((c) => <option key={c.key} value={c.key}>{name(c)}</option>)}
+                  </select>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
                 </span>{' '}
                 {L.bFor}{' '}
                 <span className="lp-price">
@@ -130,18 +125,6 @@ export default function Landing() {
                   {L.slots[slot]} ↻
                 </button>
               </p>
-              <div className="lp-chips">
-                {heroCats.map((c) => (
-                  <button key={c.key} aria-pressed={c.key === selKey} className={c.key === selKey ? 'active' : ''}
-                    style={{ background: tile(c.key)[0], color: tile(c.key)[1] }}
-                    onClick={() => { setSelKey(c.key); setPrice(roundPrice(c.fromPrice)) }}>
-                    {name(c)}
-                  </button>
-                ))}
-                {categories.length > heroCats.length && (
-                  <a href="#categories" className="lp-chip-more">{L.moreCats(categories.length - heroCats.length)}</a>
-                )}
-              </div>
               <button className="lp-builder-cta" onClick={() => navigate(signupThenPost(builderQuery))}>
                 {L.bCta}
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -183,7 +166,7 @@ export default function Landing() {
       </section>
 
       <section className="lp-section lp-panel-section lp-has-side">
-        <Side shapes={['dots-sun l mid', 'circle-peach r bottom']} />
+        <Side shapes={['dots-sun l mid', 'circle-sky r bottom']} />
         <div className="lp-panel">
           <div className="lp-deco lp-panel-blob" aria-hidden="true" />
           <div className="lp-panel-copy">

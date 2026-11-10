@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { notificationsApi } from '../api/endpoints'
-import type { AppNotification } from '../api/types'
+import type { AppNotification, NotificationType } from '../api/types'
 import { useAsync } from '../components/useAsync'
 import { Async } from '../components/Status'
 import { useI18n } from '../i18n/I18nContext'
@@ -20,6 +20,15 @@ export function notificationTarget(n: AppNotification): string {
 }
 
 /** The one button on each notification, matching where it leads. */
+// Colour family per kind of event (see .notif.tone-* in app.css).
+const TONE: Record<NotificationType, 'new' | 'good' | 'review' | 'bad' | 'refund'> = {
+  BOOKING_REQUESTED: 'new', OFFER_RECEIVED: 'new',
+  BOOKING_ACCEPTED: 'good', BOOKING_COMPLETED: 'good', OFFER_ACCEPTED: 'good', PAYMENT_RECEIVED: 'good', PAYOUT_RELEASED: 'good',
+  REVIEW_RECEIVED: 'review',
+  BOOKING_DECLINED: 'bad', BOOKING_CANCELLED: 'bad', BOOKING_EXPIRED: 'bad', OFFER_REJECTED: 'bad',
+  REFUND_ISSUED: 'refund',
+}
+
 function actionLabel(t: Dict, n: AppNotification) {
   switch (n.type) {
     case 'BOOKING_COMPLETED': return t.notifications.action.rate
@@ -73,7 +82,7 @@ export default function Notifications() {
         {list.data?.length === 0 && <div className="card muted">{t.notifications.empty}</div>}
         <ul className="notif-list">
           {list.data?.map((n) => (
-            <li key={n.id} className={`card notif${n.read ? '' : ' unread'}`} onClick={() => open(n)}>
+            <li key={n.id} className={`card notif tone-${TONE[n.type] ?? 'new'}${n.read ? '' : ' unread'}`} onClick={() => open(n)}>
               <span className="notif-avatar" style={{ background: nameColor(n.actorName) }}>
                 {n.actorName ? initials(n.actorName) : '!'}
               </span>
