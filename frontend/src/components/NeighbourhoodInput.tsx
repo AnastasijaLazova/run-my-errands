@@ -72,7 +72,7 @@ export function NeighbourhoodInput({ value, onChange, id, className, placeholder
         role="combobox" aria-expanded={open} aria-autocomplete="list" autoComplete="off"
         onFocus={show} onClick={() => !open && show()} onKeyDown={onKeyDown}
         onChange={(e) => { onChange(canonicalNeighbourhood(e.target.value)); setTyped(true); setActive(-1); setOpen(true) }} />
-      <button type="button" className="combo-toggle" tabIndex={-1} aria-label="Show neighbourhoods"
+      <button type="button" className="combo-toggle" tabIndex={-1} aria-label="Show locations"
         onMouseDown={(e) => e.preventDefault()} onClick={() => (open ? setOpen(false) : show())}>▾</button>
       {open && options.length > 0 && (
         <ul className="combo-list" role="listbox" ref={listRef}>

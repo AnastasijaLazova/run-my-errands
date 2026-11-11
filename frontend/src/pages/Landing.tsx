@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { categoriesApi, publicApi } from '../api/endpoints'
 import type { Landing as LandingData } from '../api/types'
@@ -14,7 +14,7 @@ const PRICE_MIN = 100
 const PRICE_MAX = 2000
 const PRICE_STEP = 50
 const DEFAULT_PRICE = 300
-const AVATARS = ['#6A5AE0', '#FF7A59', '#0F7B55']
+const AVATARS = ['#1E5A3F', '#6E9A1F', '#0F7B55']
 // Drawn into the match-preview illustration until real rated Givers exist.
 const SAMPLE_GIVERS: LandingData['givers'] = [
   { name: 'Bojan K.', neighbourhood: 'Karpoš', ratingAvg: 4.9, ratingCount: 12, fromPrice: 450 },
@@ -54,7 +54,7 @@ export default function Landing() {
   const categories = data?.categories ?? []
   const name = (c: { nameEn: string; nameMk: string }) => (lang === 'mk' ? c.nameMk : c.nameEn)
 
-  const [selKey, setSelKey] = useState('pharmacy')
+  const [selKey, setSelKey] = useState('laundry')
   const [price, setPrice] = useState(DEFAULT_PRICE)
   const [slot, setSlot] = useState(0)
   const selected = categories.find((c) => c.key === selKey)
@@ -93,8 +93,7 @@ export default function Landing() {
       </header>
 
       <section id="top" className="lp-hero">
-        <div className="lp-deco lp-hero-sun" aria-hidden="true" />
-        <div className="lp-deco lp-hero-dots" aria-hidden="true" />
+        <div className="lp-hero-sun" aria-hidden="true" />
         <div className="lp-wrap lp-hero-row">
           <div className="lp-hero-copy">
             <div className="lp-badge"><span />{L.badge}</div>
@@ -103,18 +102,12 @@ export default function Landing() {
           </div>
 
           <div className="lp-builder-wrap">
-            <div className="lp-deco lp-ring" aria-hidden="true" />
             <div className="lp-builder">
               <p className="lp-sentence">
                 {L.bNeed}{' '}
-                <span className="lp-sel" style={{ background: tile(selKey)[0], color: tile(selKey)[1] }}>
-                  <select value={selKey} aria-label={t.favor.category}
-                    onChange={(e) => { setSelKey(e.target.value); setPrice(roundPrice(categories.find((c) => c.key === e.target.value)?.fromPrice ?? null)) }}>
-                    {categories.length === 0 && <option value={selKey}>…</option>}
-                    {categories.map((c) => <option key={c.key} value={c.key}>{name(c)}</option>)}
-                  </select>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                </span>{' '}
+                <CategoryPicker value={selKey} label={t.favor.category}
+                  options={categories.map((c) => ({ key: c.key, label: name(c) }))}
+                  onChange={(key) => { setSelKey(key); setPrice(roundPrice(categories.find((c) => c.key === key)?.fromPrice ?? null)) }} />{' '}
                 {L.bFor}{' '}
                 <span className="lp-price">
                   <button onClick={() => setPrice((p) => Math.max(PRICE_MIN, p - PRICE_STEP))} aria-label={L.lowerPrice}>−</button>
@@ -130,7 +123,6 @@ export default function Landing() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
               </button>
             </div>
-            <div className="lp-deco lp-square" aria-hidden="true" />
           </div>
         </div>
       </section>
@@ -168,7 +160,6 @@ export default function Landing() {
       <section className="lp-section lp-panel-section lp-has-side">
         <Side shapes={['dots-sun l mid', 'circle-sky r bottom']} />
         <div className="lp-panel">
-          <div className="lp-deco lp-panel-blob" aria-hidden="true" />
           <div className="lp-panel-copy">
             <div className="lp-kicker">{L.panelKicker}</div>
             <h2>{L.panelTitle}</h2>
@@ -180,9 +171,9 @@ export default function Landing() {
               <div className="lp-map" aria-hidden="true">
                 <span className="lp-road lp-road-a" /><span className="lp-road lp-road-b" />
                 <span className="lp-radius" /><span className="lp-you" />
-                <span className="lp-pin" style={{ left: '34%', top: '30%', background: '#FF7A59' }}>1</span>
-                <span className="lp-pin" style={{ left: '62%', top: '38%', background: '#6A5AE0', color: '#fff' }}>2</span>
-                <span className="lp-pin" style={{ left: '44%', top: '70%', background: '#F5B82E' }}>3</span>
+                <span className="lp-pin" style={{ left: '34%', top: '30%', background: '#8CD3B4' }}>1</span>
+                <span className="lp-pin" style={{ left: '62%', top: '38%', background: '#1E5A3F', color: '#fff' }}>2</span>
+                <span className="lp-pin" style={{ left: '44%', top: '70%', background: '#D9F27A' }}>3</span>
               </div>
               <div className="lp-live"><span />{L.live}</div>
               <ul className="lp-givers">
@@ -211,7 +202,6 @@ export default function Landing() {
           <ol className="lp-steps">
             {L.steps.map(([title, text], i) => (
               <li key={title} className={`lp-step lp-step-${i + 1}`}>
-                <span className="lp-step-blob" aria-hidden="true" />
                 <span className="lp-step-num">{i + 1}</span>
                 <h3>{title}</h3>
                 <p>{text}</p>
@@ -225,14 +215,12 @@ export default function Landing() {
         <Side shapes={['ring-sun l mid', 'dots-green r top']} />
         <div className="lp-wrap lp-roles">
           <div className="lp-role lp-role-req">
-            <div className="lp-deco lp-role-ring" aria-hidden="true" />
             <div className="lp-kicker">{L.reqKicker}</div>
             <h2>{L.reqTitle}</h2>
             <ul>{L.reqList.map((li) => <li key={li}><span aria-hidden="true">✓</span>{li}</li>)}</ul>
             <Link to="/register" className="lp-btn lp-btn-dark">{L.reqCta}</Link>
           </div>
           <div id="giver" className="lp-role lp-role-giv">
-            <div className="lp-deco lp-role-lines" aria-hidden="true" />
             <div className="lp-kicker">{L.givKicker}</div>
             <h2>{L.givTitle}</h2>
             <ul>{L.givList.map((li) => <li key={li}><span aria-hidden="true">✓</span>{li}</li>)}</ul>
@@ -259,8 +247,6 @@ export default function Landing() {
 
       {(stats.length > 0 || reviews.length > 0) && (
         <section className="lp-proof">
-          <div className="lp-deco lp-proof-blob" aria-hidden="true" />
-          <div className="lp-deco lp-proof-dots" aria-hidden="true" />
           <div className="lp-wrap">
             {stats.length > 0 && (
               <div className="lp-stats">
@@ -289,8 +275,6 @@ export default function Landing() {
       )}
 
       <section className="lp-cta">
-        <div className="lp-deco lp-cta-a" aria-hidden="true" />
-        <div className="lp-deco lp-cta-b" aria-hidden="true" />
         <div className="lp-cta-inner">
           <h2>{L.ctaTitle}</h2>
           <p>{L.ctaSub}</p>
@@ -315,5 +299,69 @@ export default function Landing() {
         <div className="lp-wrap lp-copyright">© {new Date().getFullYear()} Run My Errands · Skopje</div>
       </footer>
     </div>
+  )
+}
+
+/** Styled replacement for the builder's <select>: the native option list can't be themed (OS blue highlight). */
+function CategoryPicker({ value, options, label, onChange }: {
+  value: string; options: { key: string; label: string }[]; label: string; onChange: (key: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [active, setActive] = useState(-1)
+  const wrapRef = useRef<HTMLSpanElement>(null)
+  const listRef = useRef<HTMLSpanElement>(null)
+  const current = options.find((o) => o.key === value)
+  const [bg, fg] = tile(value)
+
+  useEffect(() => {
+    if (!open) return
+    const close = (e: MouseEvent) => { if (!wrapRef.current?.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [open])
+
+  useEffect(() => {
+    if (open && active >= 0) listRef.current?.children[active]?.scrollIntoView({ block: 'nearest' })
+  }, [open, active])
+
+  const show = () => { setActive(Math.max(0, options.findIndex((o) => o.key === value))); setOpen(true) }
+  const pick = (key: string) => { onChange(key); setOpen(false) }
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (!open) return show()
+      const step = e.key === 'ArrowDown' ? 1 : -1
+      setActive((i) => (i + step + options.length) % options.length)
+    } else if ((e.key === 'Enter' || e.key === ' ') && open && options[active]) {
+      e.preventDefault()
+      pick(options[active].key)
+    } else if (e.key === 'Escape' || e.key === 'Tab') {
+      setOpen(false)
+    }
+  }
+
+  return (
+    <span className="lp-sel" ref={wrapRef}>
+      <button type="button" className="lp-sel-btn" style={{ background: bg, color: fg }}
+        aria-haspopup="listbox" aria-expanded={open} aria-label={`${label}: ${current?.label ?? ''}`}
+        onClick={() => (open ? setOpen(false) : show())} onKeyDown={onKeyDown}>
+        {current?.label ?? '…'}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      {open && options.length > 0 && (
+        <span className="lp-sel-list" role="listbox" aria-label={label} ref={listRef}>
+          {options.map((o, i) => (
+            <span key={o.key} role="option" aria-selected={o.key === value}
+              className={'lp-sel-opt' + (i === active ? ' active' : '') + (o.key === value ? ' selected' : '')}
+              onMouseEnter={() => setActive(i)} onClick={() => pick(o.key)}>
+              <span className="lp-sel-dot" style={{ background: tile(o.key)[0] }} aria-hidden="true" />
+              {o.label}
+              {o.key === value && <span className="lp-sel-check" aria-hidden="true">✓</span>}
+            </span>
+          ))}
+        </span>
+      )}
+    </span>
   )
 }

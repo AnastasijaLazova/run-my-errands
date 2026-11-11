@@ -1,29 +1,29 @@
 /* Design tokens — taken from the Run My Errands prototype (green accent, Figtree). */
 :root {
-  --paper: #F7F7F5;
+  --paper: #F4F8F3;
   --card: #FFFFFF;
-  --ink: #14181A;
-  --muted: #6B7280;
-  --line: #E4E5E3;
+  --ink: #12201A;
+  --muted: #5A6B62;
+  --line: #DCE7DF;
   --accent: #0F7B55;
   --accent-soft: #E3F2EC;
   --danger: #B42318;
-  --warn: #9A5B00;
-  --warn-soft: #FDF3E1;
+  --warn: #4F6B10;
+  --warn-soft: #F1FAD0;
   --radius: 14px;
   --shadow: 0 1px 2px rgba(20, 24, 26, 0.06), 0 4px 12px rgba(20, 24, 26, 0.04);
-  --map-bg: #FBF4EA;
-  --map-grid: #F0E4D4;
-  --map-ring: #A78BFA;
+  --map-bg: #F1F7EE;
+  --map-grid: #DCEBD6;
+  --map-ring: #8CD3B4;
   /* Brighter palette shared with the landing page */
   --deep: #10241C;
   --mint: #8CD3B4;
   --lime: #D9F27A;
-  --sun: #F5B82E;
-  --sun-soft: #FFF1CF;
-  --peach: #FFD6C9;
-  --violet: #6A5AE0;
-  --violet-soft: #E8DDF9;
-  --sky: #DCEFFB;
+  --sun: #C4E05A;
+  --sun-soft: #F1FAD0;
+  --peach: #C5E8D6;
+  --violet: #1E5A3F;
+  --violet-soft: #DCEFE4;
+  --sky: #E3F2EC;
   --font: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }

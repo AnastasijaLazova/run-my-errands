@@ -38,7 +38,7 @@ function actionLabel(t: Dict, n: AppNotification) {
   }
 }
 
-function timeAgo(t: Dict, iso: string) {
+export function timeAgo(t: Dict, iso: string) {
   const minutes = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000))
   if (minutes < 1) return t.notifications.ago.now
   if (minutes < 60) return t.notifications.ago.minutes(minutes)

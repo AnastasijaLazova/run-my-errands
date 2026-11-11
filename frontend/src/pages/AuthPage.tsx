@@ -51,6 +51,7 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
         <Link to="/welcome" className="auth-brand"><span className="auth-logo">R</span>{t.appName}</Link>
         <div>
           <h1>{t.auth.heroTitle}</h1>
+          <p className="auth-lead">{t.auth.heroLead}</p>
           <p>{t.auth.heroSub}</p>
         </div>
         <div />
