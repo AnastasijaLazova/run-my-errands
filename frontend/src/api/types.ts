@@ -119,3 +119,5 @@ export interface AppNotification {
   id: number; type: NotificationType; bookingId: number | null; offerId: number | null; favorId: number | null
   actorName: string | null; favorTitle: string | null; amount: number | null; createdAt: string; read: boolean
 }
+
+export interface ChatMessage { role: 'user' | 'assistant'; content: string }

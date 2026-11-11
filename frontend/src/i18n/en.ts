@@ -48,6 +48,14 @@ export const en = {
     ctaPrimary: 'Post a favor', ctaSecondary: 'Join as a Giver',
     footNote: 'A location-based favor marketplace. We connect people — you agree the rest.', footCol1: 'Requesters', footCol2: 'Givers',
   },
+  chat: {
+    open: 'Need help? Ask me', title: 'Assistant', close: 'Close assistant', clear: 'New chat',
+    welcome: 'Hi! I’m the Run My Errands assistant. Ask me how to post a favor, how payment works, or anything else about the app.',
+    suggestions: ['How do I post a favor?', 'How does payment work?', 'Can I cancel a booking?'],
+    inputLabel: 'Your message', placeholder: 'Type a message…', hint: 'Enter sends, Shift+Enter starts a new line.',
+    send: 'Send', you: 'You', assistant: 'Assistant', thinking: 'The assistant is typing…',
+    error: 'Your message wasn’t sent. Please try again.', unavailable: 'The assistant isn’t available right now.',
+  },
   common: { loading: 'Loading…', empty: 'Nothing here yet.', save: 'Save', cancel: 'Cancel', back: 'Back', error: 'Something went wrong' },
   favor: { postTitle: 'Request a favor', category: 'Category', title: 'What do you need?', description: 'Details', budget: 'Your price (MKD)', when: 'When', asap: 'As soon as possible', scheduled: 'Pick a date & time', neighbourhood: 'Location', submit: 'Find givers', mine: 'My requests', matches: 'Available givers', noMatches: 'No givers match yet — try a different price or check back later.', book: 'Request booking', offers: 'Offers received', byRating: 'Top rated', byPrice: 'Lowest price', edit: 'Edit request', cancelFavor: 'Cancel request', cancelConfirm: 'Cancel this request? Any pending offers on it will be withdrawn.' },
   matches: {

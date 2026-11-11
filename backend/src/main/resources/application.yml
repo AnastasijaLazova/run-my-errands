@@ -22,3 +22,7 @@ app:
     secret: "change-this-to-a-long-random-secret-before-production-CHANGE_ME"
     access-token-expiration-ms: 900000
     refresh-token-expiration-ms: 604800000
+  chat:
+    # Leave unset to switch the assistant off; the chat endpoint then answers 503.
+    api-key: ${ANTHROPIC_API_KEY:}
+    model: claude-opus-5-5

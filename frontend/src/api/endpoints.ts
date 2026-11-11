@@ -25,6 +25,10 @@ export const categoriesApi = { list: () => api<T.Category[]>('/categories') }
 
 export const publicApi = { landing: () => api<T.Landing>('/public/landing') }
 
+export const chatApi = {
+  send: (messages: T.ChatMessage[]) => api<{ reply: string }>('/chat', { method: 'POST', body: { messages } }),
+}
+
 export const giversApi = { get: (id: number) => api<T.GiverProfile>(`/givers/${id}`) }
 
 export const favorsApi = {

@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useAuth } from '../auth/AuthContext'
 import { useI18n } from '../i18n/I18nContext'
 import { useNotifications } from '../notifications/NotificationsContext'
+import ChatWidget from './ChatWidget'
 
 export function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -120,6 +121,7 @@ export default function Layout() {
         </div>
       </header>
       <main className="container"><Outlet /></main>
+      {me && <ChatWidget key={me.id} userId={me.id} />}
       <TabBar />
     </>
   )
