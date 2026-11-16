@@ -135,7 +135,7 @@ export const en = {
     cancelUnpaid: 'Nothing has been paid, so nothing is charged.',
     reason: 'Reason (optional)', keep: 'Keep booking', confirmCancel: 'Cancel booking',
   },
-  rate: { title: 'Rate your experience', stars: 'Stars', text: 'Comment (optional)', submit: 'Submit review', blind: 'Reviews are hidden until you both submit, or 7 days pass.', done: 'Thanks — your review is in.' },
+  rate: { title: 'Rate your experience', stars: 'Stars', text: 'Comment (optional)', submit: 'Submit review', doneTitle: 'Review submitted', blind: 'Reviews are hidden until you both submit, or 7 days pass.', done: 'Thanks — your review is in.' },
   post: { editTitle: 'Edit your request', saveChanges: 'Save changes', categoryLocked: 'The category can’t be changed after posting.', notEditable: 'This request is already booked or closed, so it can’t be edited.',
     title: 'Post a favor', step: '1 of 1 · Pay in the app once a Giver accepts',
     sub: "Describe what you need and what you'll pay. We'll show nearby Givers at a similar price straight away.",

@@ -13,7 +13,7 @@ export function useMoney() {
   return (n: number | null | undefined) => `${formatDen(n)} ${t.dash.den}`
 }
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="card modal" role="dialog" aria-modal="true" aria-label={title}>
