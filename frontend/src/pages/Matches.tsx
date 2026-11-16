@@ -73,6 +73,36 @@ export default function Matches() {
       )}
       {error && <p className="error">{error}</p>}
 
+      {/* Offers are givers who already said yes, so they go above the browse list rather than below the map. */}
+      {offers.data && offers.data.length > 0 && (
+        <section className="offers-section">
+          <h2>{t.favor.offers}</h2>
+          {offers.data.map((o) => {
+            const giver = rows.find((m) => m.userId === o.giverId)
+            return (
+              <div className="card row offer-card" key={o.id}>
+                <div className="match-avatar small" style={{ background: avatarColor(o.giverId) }}>
+                  {initials(giver?.displayName ?? '')}
+                </div>
+                <div className="offer-body">
+                  <div className="match-name">
+                    <Link to={`/givers/${o.giverId}`}>{giver?.displayName || `Giver #${o.giverId}`}</Link>
+                    {o.proposedPrice != null && <span className="offer-price">{o.proposedPrice} MKD</span>}
+                  </div>
+                  {o.message && <div className="muted">{o.message}</div>}
+                </div>
+                {o.status === 'PENDING' && (
+                  <div className="btn-row">
+                    <button className="primary" onClick={async () => { const b = await offersApi.accept(o.id); navigate(`/bookings/${b.id}`) }}>{t.booking.accept}</button>
+                    <button onClick={async () => { await offersApi.reject(o.id); offers.reload() }}>{t.booking.decline}</button>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </section>
+      )}
+
       <div className="matches-layout">
         <div>
           <Async loading={matches.loading} error={matches.error} empty={false}>
@@ -112,24 +142,6 @@ export default function Matches() {
                     pins={rows.map((m, i) => ({ id: m.userId, label: String(i + 1), neighbourhood: m.neighbourhood, distanceKm: m.km }))} />
         </aside>
       </div>
-
-      <h2>{t.favor.offers}</h2>
-      <Async loading={offers.loading} error={offers.error} empty={offers.data?.length === 0}>
-        {offers.data?.map((o) => (
-          <div className="card row" key={o.id}>
-            <div>
-              <Link to={`/givers/${o.giverId}`}>Giver #{o.giverId}</Link> — {o.proposedPrice ? `${o.proposedPrice} MKD` : ''}
-              <div className="muted">{o.message}</div>
-            </div>
-            {o.status === 'PENDING' && (
-              <div className="btn-row">
-                <button className="primary" onClick={async () => { const b = await offersApi.accept(o.id); navigate(`/bookings/${b.id}`) }}>{t.booking.accept}</button>
-                <button onClick={async () => { await offersApi.reject(o.id); offers.reload() }}>{t.booking.decline}</button>
-              </div>
-            )}
-          </div>
-        ))}
-      </Async>
     </div>
   )
 }
