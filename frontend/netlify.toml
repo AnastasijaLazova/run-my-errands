@@ -1,0 +1,23 @@
+# Netlify build + routing config for the Run My Errands frontend.
+#
+# After the Render backend is live, replace BACKEND_URL below with the real URL
+# (e.g. https://run-my-errands.onrender.com), then redeploy the Netlify site.
+
+[build]
+  base    = "frontend"
+  command = "npm run build"
+  publish = "frontend/dist"
+
+# Proxy API calls to the Render backend so the browser only ever talks to the
+# Netlify origin (no CORS needed). The frontend keeps calling /api/v1/... as-is.
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://BACKEND_URL.onrender.com/api/:splat"
+  status = 200
+  force  = true
+
+# SPA fallback: every non-file URL serves index.html so React Router handles it.
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

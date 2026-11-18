@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import NeighbourhoodScene from '../components/NeighbourhoodScene'
 import { useI18n } from '../i18n/I18nContext'
 import { NeighbourhoodInput } from '../components/NeighbourhoodInput'
 import type { SignupRole } from '../api/types'
@@ -51,10 +52,9 @@ export default function AuthPage({ mode }: { mode: 'login' | 'register' }) {
         <Link to="/welcome" className="auth-brand"><span className="auth-logo">R</span>{t.appName}</Link>
         <div>
           <h1>{t.auth.heroTitle}</h1>
-          <p className="auth-lead">{t.auth.heroLead}</p>
           <p>{t.auth.heroSub}</p>
         </div>
-        <div />
+        <NeighbourhoodScene className="auth-scene" label={t.auth.sceneAlt} />
       </section>
 
       <section className="auth-panel">

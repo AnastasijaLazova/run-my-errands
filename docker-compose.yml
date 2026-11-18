@@ -1,0 +1,41 @@
+# Whole app in containers: docker compose up --build  ->  http://localhost:3000
+# Secrets come from a .env file next to this one (copy .env.example).
+# For day-to-day development keep using backend/docker-compose.yml (database only) + mvn + npm run dev.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: run_my_errands
+      POSTGRES_USER: rme
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rme -d run_my_errands"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/run_my_errands
+      SPRING_DATASOURCE_USERNAME: rme
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_JPA_SHOW_SQL: "false"
+      APP_JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

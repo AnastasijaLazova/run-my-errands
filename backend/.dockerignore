@@ -1,0 +1,7 @@
+target/
+scripts/
+.mvn/
+mvnw
+mvnw.cmd
+Dockerfile
+docker-compose.yml

@@ -24,7 +24,6 @@ const SAMPLE_GIVERS: LandingData['givers'] = [
 const roundPrice = (p: number | null) =>
   p == null ? DEFAULT_PRICE : Math.min(PRICE_MAX, Math.max(PRICE_MIN, Math.ceil(p / PRICE_STEP) * PRICE_STEP))
 const initials = (name: string) => name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k` : String(n))
 /** Signs up first, then lands on the post form with these fields filled in. */
 const signupThenPost = (query: string) => `/register?next=${encodeURIComponent(`/post?${query}`)}`
 
@@ -62,11 +61,6 @@ export default function Landing() {
   useEffect(() => { if (selected) setPrice(roundPrice(selected.fromPrice)) }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const givers = data?.givers.length ? data.givers : SAMPLE_GIVERS
-  const stats = data ? [
-    { value: data.stats.categoryCount, label: L.statCategories },
-    { value: data.stats.giverCount, label: L.statGivers },
-    { value: data.stats.completedCount, label: L.statCompleted },
-  ].filter((s) => s.value > 0) : []
   const reviews = data?.reviews ?? []
   const den = (n: number) => `${formatDen(n)} ${t.dash.den}`
   const builderQuery = `category=${selKey}&budget=${price}&when=${SLOT_KEYS[slot]}`
@@ -132,7 +126,7 @@ export default function Landing() {
         <div className="lp-cats-inner">
           <div className="lp-section-head">
             <div>
-              <h2>{L.catTitle(categories.length || 13)}</h2>
+              <h2>{L.catTitle(categories.length || 14)}</h2>
               <p>{L.catSub}</p>
             </div>
             {categories.some((c) => c.trustTier === 'HIGH') && (
@@ -245,31 +239,22 @@ export default function Landing() {
         </div>
       </section>
 
-      {(stats.length > 0 || reviews.length > 0) && (
+      {reviews.length > 0 && (
         <section className="lp-proof">
           <div className="lp-wrap">
-            {stats.length > 0 && (
-              <div className="lp-stats">
-                {stats.map((s) => <div key={s.label}><strong>{compact(s.value)}</strong><span>{s.label}</span></div>)}
-              </div>
-            )}
-            {reviews.length > 0 && (
-              <>
-                <h2>{L.revTitle}</h2>
-                <div className="lp-reviews">
-                  {reviews.map((r, i) => (
-                    <figure key={i}>
-                      <div className="lp-stars" role="img" aria-label={L.starsLabel(r.stars)}>{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</div>
-                      <blockquote>{r.text}</blockquote>
-                      <figcaption>
-                        <span className="lp-avatar" style={{ background: AVATARS[i % AVATARS.length] }}>{initials(r.authorName)}</span>
-                        <span><strong>{r.authorName}</strong><span className="lp-muted">{lang === 'mk' ? r.categoryNameMk : r.categoryNameEn}</span></span>
-                      </figcaption>
-                    </figure>
-                  ))}
-                </div>
-              </>
-            )}
+            <h2>{L.revTitle}</h2>
+            <div className="lp-reviews">
+              {reviews.map((r, i) => (
+                <figure key={i}>
+                  <div className="lp-stars" role="img" aria-label={L.starsLabel(r.stars)}>{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</div>
+                  <blockquote>{r.text}</blockquote>
+                  <figcaption>
+                    <span className="lp-avatar" style={{ background: AVATARS[i % AVATARS.length] }}>{initials(r.authorName)}</span>
+                    <span><strong>{r.authorName}</strong><span className="lp-muted">{lang === 'mk' ? r.categoryNameMk : r.categoryNameEn}</span></span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
         </section>
       )}

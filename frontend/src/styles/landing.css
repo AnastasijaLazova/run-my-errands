@@ -175,9 +175,10 @@
 .lp-role-req { background: var(--lp-lime); color: #1F2A10; }
 .lp-role-req .lp-kicker { color: #3F5B12; }
 .lp-role-req li span { color: var(--lp-green); }
-.lp-role-giv { background: var(--lp-ink); color: rgba(255, 255, 255, .82); }
+.lp-role-giv { background: var(--lp-green); color: rgba(255, 255, 255, .9); }
 .lp-role-giv h2 { color: #fff; }
-.lp-role-giv .lp-kicker, .lp-role-giv li span { color: var(--lp-mint); }
+.lp-role-giv .lp-kicker, .lp-role-giv li span { color: var(--lp-lime); }
+.lp-role-giv .lp-btn-mint { background: #fff; color: var(--lp-green) !important; }
 
 /* trust */
 .lp-trust-section { padding-top: 0; }
@@ -194,10 +195,6 @@
 /* stats + reviews */
 .lp-proof { background: var(--lp-green); color: #fff; padding: 72px 24px; position: relative; overflow: hidden; }
 .lp-proof .lp-wrap { position: relative; }
-.lp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
-.lp-stats + h2 { margin-top: 56px; }
-.lp-stats strong { display: block; font-size: 56px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--lp-lime); }
-.lp-stats span { display: block; font-size: 16px; color: rgba(255, 255, 255, .85); margin-top: 8px; }
 .lp-proof h2 { color: #fff; margin: 0 0 24px; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
 .lp-reviews { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
 .lp-reviews figure { margin: 0; background: #fff; color: var(--ink); border-radius: 20px; padding: 24px; }
